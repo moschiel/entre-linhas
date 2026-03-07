@@ -31,8 +31,15 @@ const actionHint = document.getElementById("actionHint");
 const boardSection = document.getElementById("boardSection");
 const matrixHeadRow = document.getElementById("matrixHeadRow");
 const matrixBody = document.getElementById("matrixBody");
+const deckSection = document.getElementById("deckSection");
+const drawPileCount = document.getElementById("drawPileCount");
+const myCardValue = document.getElementById("myCardValue");
+const drawCardBtn = document.getElementById("drawCardBtn");
+const drawHint = document.getElementById("drawHint");
 
 let myRoleValue = null;
+let myPrivateCard = null;
+let lastGameState = null;
 
 const savedName = localStorage.getItem(NAME_KEY);
 if (savedName) {
@@ -154,12 +161,46 @@ function renderBoard(game) {
   matrixBody.innerHTML = bodyRows;
 }
 
+function renderDeck(game) {
+  const inGame = Boolean(game && game.phase === "in_game");
+  deckSection.classList.toggle("hidden", !inGame);
+
+  if (!inGame) {
+    drawPileCount.textContent = "0";
+    myCardValue.textContent = "nenhuma";
+    drawCardBtn.disabled = true;
+    drawHint.textContent = "Saque manual: nao existe ordem de turno.";
+    return;
+  }
+
+  drawPileCount.textContent = String(game.drawPileCount || 0);
+  myCardValue.textContent = myPrivateCard ? myPrivateCard.coord : "nenhuma";
+
+  const hasCard = Boolean(myPrivateCard);
+  const canDraw = (game.drawPileCount || 0) > 0 && !hasCard;
+  drawCardBtn.disabled = !canDraw;
+
+  if (hasCard) {
+    drawHint.textContent = "Voce ja tem uma carta. Nas proximas etapas ela podera ser jogada ou descartada.";
+    return;
+  }
+
+  if ((game.drawPileCount || 0) === 0) {
+    drawHint.textContent = "A pilha acabou.";
+    return;
+  }
+
+  drawHint.textContent = "Saque quando quiser. Os dois jogadores podem sacar em paralelo.";
+}
+
 socket.on("state:update", (state) => {
+  lastGameState = state.game || null;
   hostState.textContent = formatSlot(state.host);
   guestState.textContent = formatSlot(state.guest);
   renderGameStatus(state.game);
   renderActionButtons(state);
   renderBoard(state.game);
+  renderDeck(state.game);
 
   if (state.connectedCount === state.capacity) {
     roomStatus.textContent = "Sala completa";
@@ -180,6 +221,11 @@ socket.on("connect_error", () => {
   roomStatus.textContent = "Erro de conexao";
 });
 
+socket.on("state:private", (state) => {
+  myPrivateCard = state ? state.myCard : null;
+  renderDeck(lastGameState);
+});
+
 saveNameBtn.addEventListener("click", () => {
   const name = nameInput.value.trim();
   if (!name) {
@@ -196,4 +242,8 @@ startGameBtn.addEventListener("click", () => {
 
 endGameBtn.addEventListener("click", () => {
   socket.emit("game:end");
+});
+
+drawCardBtn.addEventListener("click", () => {
+  socket.emit("card:draw");
 });
