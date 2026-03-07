@@ -104,12 +104,20 @@ button:disabled {
   gap: 8px;
 }
 
+.top-gap {
+  margin-top: 8px;
+}
+
 .actions-row button {
   flex: 1;
 }
 
 .danger {
   background: var(--danger);
+}
+
+.danger-soft {
+  background: #8a3b12;
 }
 
 .matrix-wrap {
@@ -180,6 +188,11 @@ button:disabled {
   font-weight: 700;
 }
 
+.coord-cell.selected {
+  outline: 2px solid #b42318;
+  outline-offset: -2px;
+}
+
 .coord-mini {
   font-size: 0.62rem;
   line-height: 1.1;
@@ -197,6 +210,20 @@ button:disabled {
   background: #f8f2e8;
   font-weight: 700;
   letter-spacing: 0.5px;
+}
+
+#selectedCoord {
+  font-weight: 700;
+}
+
+.discard-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.discard-list li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
 }
 
 .hint {

@@ -34,13 +34,19 @@ const matrixBody = document.getElementById("matrixBody");
 const deckSection = document.getElementById("deckSection");
 const drawPileCount = document.getElementById("drawPileCount");
 const myCardValue = document.getElementById("myCardValue");
+const selectedCoord = document.getElementById("selectedCoord");
 const drawCardBtn = document.getElementById("drawCardBtn");
 const placeCardBtn = document.getElementById("placeCardBtn");
+const discardCardBtn = document.getElementById("discardCardBtn");
+const invalidateCardBtn = document.getElementById("invalidateCardBtn");
 const drawHint = document.getElementById("drawHint");
+const discardSection = document.getElementById("discardSection");
+const discardList = document.getElementById("discardList");
 
 let myRoleValue = null;
 let myPrivateCard = null;
 let lastGameState = null;
+let selectedBoardCoord = null;
 
 const savedName = localStorage.getItem(NAME_KEY);
 if (savedName) {
@@ -135,6 +141,8 @@ function renderBoard(game) {
   if (!shouldShow) {
     matrixHeadRow.innerHTML = '<th class="corner-cell">-</th>';
     matrixBody.innerHTML = "";
+    selectedBoardCoord = null;
+    selectedCoord.textContent = "nenhuma";
     return;
   }
 
@@ -145,6 +153,12 @@ function renderBoard(game) {
   (game.boardPlacements || []).forEach((placement) => {
     placements[placement.coord] = placement;
   });
+
+  if (selectedBoardCoord && !placements[selectedBoardCoord]) {
+    selectedBoardCoord = null;
+  }
+
+  selectedCoord.textContent = selectedBoardCoord || "nenhuma";
 
   const headCells = ['<th class="corner-cell">-</th>'];
   cols.forEach((col) => {
@@ -165,7 +179,8 @@ function renderBoard(game) {
             return `<td class="coord-cell" data-coord="${coord}">${coord}</td>`;
           }
 
-          return `<td class="coord-cell filled" data-coord="${coord}"><div>${coord}</div><div class="coord-mini">${placed.placedByName}</div></td>`;
+          const selectedClass = selectedBoardCoord === coord ? " selected" : "";
+          return `<td class="coord-cell filled${selectedClass}" data-coord="${coord}"><div>${coord}</div><div class="coord-mini">${placed.placedByName}</div></td>`;
         })
         .join("");
 
@@ -174,6 +189,15 @@ function renderBoard(game) {
     .join("");
 
   matrixBody.innerHTML = bodyRows;
+
+  matrixBody.querySelectorAll(".coord-cell.filled").forEach((cell) => {
+    cell.addEventListener("click", () => {
+      selectedBoardCoord = cell.dataset.coord || null;
+      selectedCoord.textContent = selectedBoardCoord || "nenhuma";
+      renderBoard(game);
+      renderDeck(lastGameState);
+    });
+  });
 }
 
 function renderDeck(game) {
@@ -185,7 +209,11 @@ function renderDeck(game) {
     myCardValue.textContent = "nenhuma";
     drawCardBtn.disabled = true;
     placeCardBtn.disabled = true;
+    discardCardBtn.disabled = true;
+    invalidateCardBtn.disabled = true;
     drawHint.textContent = "Saque manual: nao existe ordem de turno.";
+    discardSection.classList.add("hidden");
+    discardList.innerHTML = "";
     return;
   }
 
@@ -194,8 +222,20 @@ function renderDeck(game) {
 
   const hasCard = Boolean(myPrivateCard);
   const canDraw = (game.drawPileCount || 0) > 0 && !hasCard;
+  const isHost = myRoleValue === "host";
+  invalidateCardBtn.classList.toggle("hidden", !isHost);
   drawCardBtn.disabled = !canDraw;
   placeCardBtn.disabled = !hasCard;
+  discardCardBtn.disabled = !hasCard;
+  invalidateCardBtn.disabled = !selectedBoardCoord;
+
+  const discardedCount = game.discardPileCount || 0;
+  discardSection.classList.remove("hidden");
+  if (discardedCount === 0) {
+    discardList.innerHTML = "<li>Nenhuma carta descartada ainda.</li>";
+  } else {
+    discardList.innerHTML = `<li>${discardedCount} carta(s) no descarte. Coordenadas ocultas ate o fim da partida.</li>`;
+  }
 
   if (hasCard) {
     drawHint.textContent = "Voce ja tem uma carta. Se quiser, use Colocar no tabuleiro.";
@@ -267,4 +307,18 @@ drawCardBtn.addEventListener("click", () => {
 
 placeCardBtn.addEventListener("click", () => {
   socket.emit("card:place");
+});
+
+discardCardBtn.addEventListener("click", () => {
+  socket.emit("card:discard");
+});
+
+invalidateCardBtn.addEventListener("click", () => {
+  if (!selectedBoardCoord) {
+    return;
+  }
+
+  socket.emit("card:invalidate", selectedBoardCoord);
+  selectedBoardCoord = null;
+  selectedCoord.textContent = "nenhuma";
 });

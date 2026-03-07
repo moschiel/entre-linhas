@@ -102,6 +102,7 @@ const sessionState = {
     matrix: null,
     drawPile: [],
     boardPlacements: {},
+    discardPile: [],
     hands: {
       host: null,
       guest: null,
@@ -139,6 +140,7 @@ function getPublicState() {
       matrix: sessionState.game.matrix,
       drawPileCount: sessionState.game.drawPile.length,
       boardPlacements: Object.values(sessionState.game.boardPlacements),
+      discardPileCount: sessionState.game.discardPile.length,
       hostHasCard: Boolean(sessionState.game.hands.host),
       guestHasCard: Boolean(sessionState.game.hands.guest),
       canStart: hasHost && hasGuest && hostOnline && guestOnline && sessionState.game.phase === "lobby",
@@ -275,6 +277,7 @@ io.on("connection", (socket) => {
     sessionState.game.matrix = buildMatrixWords();
     sessionState.game.drawPile = buildCoordinateDeck();
     sessionState.game.boardPlacements = {};
+    sessionState.game.discardPile = [];
     sessionState.game.hands.host = null;
     sessionState.game.hands.guest = null;
     emitState();
@@ -343,6 +346,71 @@ io.on("connection", (socket) => {
     emitPrivateState();
   });
 
+  socket.on("card:discard", () => {
+    const requester = getSlotByToken(playerToken);
+
+    if (!requester) {
+      return;
+    }
+
+    if (sessionState.game.phase !== "in_game") {
+      return;
+    }
+
+    const card = sessionState.game.hands[requester.role];
+    if (!card) {
+      return;
+    }
+
+    sessionState.game.discardPile.push({
+      coord: card.coord,
+      source: "hand",
+      discardedByRole: requester.role,
+      discardedByName: requester.name,
+      discardedAt: Date.now(),
+    });
+
+    sessionState.game.hands[requester.role] = null;
+    emitState();
+    emitPrivateState();
+  });
+
+  socket.on("card:invalidate", (coord) => {
+    const requester = getSlotByToken(playerToken);
+    const safeCoord = typeof coord === "string" ? coord.trim().toUpperCase() : "";
+
+    if (!requester || !safeCoord) {
+      return;
+    }
+
+    if (requester.role !== "host") {
+      return;
+    }
+
+    if (sessionState.game.phase !== "in_game") {
+      return;
+    }
+
+    const placement = sessionState.game.boardPlacements[safeCoord];
+    if (!placement) {
+      return;
+    }
+
+    delete sessionState.game.boardPlacements[safeCoord];
+
+    sessionState.game.discardPile.push({
+      coord: placement.coord,
+      source: "board",
+      discardedByRole: requester.role,
+      discardedByName: requester.name,
+      originallyPlacedByName: placement.placedByName,
+      discardedAt: Date.now(),
+    });
+
+    emitState();
+    emitPrivateState();
+  });
+
   socket.on("game:end", () => {
     const requester = getSlotByToken(playerToken);
 
@@ -365,6 +433,7 @@ io.on("connection", (socket) => {
     sessionState.game.matrix = null;
     sessionState.game.drawPile = [];
     sessionState.game.boardPlacements = {};
+    sessionState.game.discardPile = [];
     sessionState.game.hands.host = null;
     sessionState.game.hands.guest = null;
     emitState();
