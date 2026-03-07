@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entre Linhas - Lobby</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="screen">
+      <h1>Entre Linhas</h1>
+      <p class="subtitle">Etapa 3: matriz 5x5 com palavras sorteadas</p>
+
+      <section class="card">
+        <p><strong>Seu papel:</strong> <span id="myRole">Conectando...</span></p>
+        <p><strong>Status da sala:</strong> <span id="roomStatus">Aguardando</span></p>
+        <p><strong>Status do jogo:</strong> <span id="gameStatus">Lobby</span></p>
+      </section>
+
+      <section class="card">
+        <h2>Partida</h2>
+        <div class="actions-row">
+          <button id="startGameBtn" disabled>Iniciar jogo</button>
+          <button id="endGameBtn" class="danger" disabled>Encerrar jogo</button>
+        </div>
+        <p id="actionHint" class="hint">Apenas o host inicia/encerra a partida.</p>
+      </section>
+
+      <section id="boardSection" class="card hidden">
+        <h2>Matriz 5x5</h2>
+        <p class="hint">Linhas: A-E com palavra da linha. Colunas: 1-5 com palavra da coluna.</p>
+
+        <div class="matrix-wrap">
+          <table class="matrix-table" aria-label="Matriz de coordenadas">
+            <thead>
+              <tr id="matrixHeadRow">
+                <th class="corner-cell">-</th>
+              </tr>
+            </thead>
+            <tbody id="matrixBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Jogadores</h2>
+
+        <div class="player-row">
+          <span class="label">Host</span>
+          <span id="hostState">vazio</span>
+        </div>
+
+        <div class="player-row">
+          <span class="label">Convidado</span>
+          <span id="guestState">vazio</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Seu nome</h2>
+        <div class="name-row">
+          <input id="nameInput" type="text" maxlength="20" placeholder="Ex.: Marcos" />
+          <button id="saveNameBtn">Salvar</button>
+        </div>
+        <p class="hint">Dica: o nome fica salvo neste celular para reconectar como o mesmo jogador.</p>
+      </section>
+
+      <section id="fullWarning" class="card warning hidden">
+        <h2>Sala cheia</h2>
+        <p>Ja existem 2 jogadores nessa sessao. Feche este dispositivo.</p>
+      </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
