@@ -22,6 +22,7 @@ const saveNameBtn = document.getElementById("saveNameBtn");
 const myRole = document.getElementById("myRole");
 const roomStatus = document.getElementById("roomStatus");
 const gameStatus = document.getElementById("gameStatus");
+const connectionStatus = document.getElementById("connectionStatus");
 const hostState = document.getElementById("hostState");
 const guestState = document.getElementById("guestState");
 const fullWarning = document.getElementById("fullWarning");
@@ -61,7 +62,13 @@ const socket = io({
   auth: {
     playerToken,
   },
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
 });
+
+connectionStatus.textContent = "Conectando...";
 
 function formatSlot(slot) {
   if (!slot) {
@@ -86,6 +93,8 @@ socket.on("session:assigned", (payload) => {
   if (currentName.length > 0) {
     socket.emit("player:setName", currentName);
   }
+
+  connectionStatus.textContent = "Conectado";
 });
 
 function renderGameStatus(game) {
@@ -320,7 +329,19 @@ socket.on("session:full", () => {
 });
 
 socket.on("connect_error", () => {
-  roomStatus.textContent = "Erro de conexao";
+  connectionStatus.textContent = "Falha de conexao";
+});
+
+socket.on("disconnect", () => {
+  connectionStatus.textContent = "Desconectado - tentando reconectar";
+});
+
+socket.io.on("reconnect_attempt", () => {
+  connectionStatus.textContent = "Reconectando...";
+});
+
+socket.io.on("reconnect", () => {
+  connectionStatus.textContent = "Reconectado";
 });
 
 socket.on("state:private", (state) => {

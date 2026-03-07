@@ -231,6 +231,10 @@ button:disabled {
   font-weight: 800;
 }
 
+#connectionStatus {
+  font-weight: 700;
+}
+
 .hint {
   color: var(--muted);
   font-size: 0.85rem;
