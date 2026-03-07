@@ -257,11 +257,14 @@ function renderDeck(game) {
 
   const discardedCount = game.discardPileCount || 0;
   const isEnded = ended;
+  const discardActivity = game.discardActivity || [];
   discardSection.classList.remove("hidden");
   if (!isEnded && discardedCount === 0) {
     discardList.innerHTML = "<li>Nenhuma carta descartada ainda.</li>";
   } else if (!isEnded) {
-    discardList.innerHTML = `<li>${discardedCount} carta(s) no descarte. Coordenadas ocultas ate o fim da partida.</li>`;
+    discardList.innerHTML = discardActivity
+      .map((entry) => `<li>${entry.text}</li>`)
+      .join("");
   } else {
     const finalDiscardPile = (game.finalSummary && game.finalSummary.discardPile) || [];
     if (finalDiscardPile.length === 0) {

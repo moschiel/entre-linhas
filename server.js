@@ -140,6 +140,24 @@ function computeFinalSummary() {
   };
 }
 
+function buildDiscardActivity() {
+  return sessionState.game.discardPile.map((item) => {
+    if (item.source === "board") {
+      return {
+        type: "invalidate",
+        byName: item.discardedByName,
+        text: `${item.discardedByName} invalidou uma carta do tabuleiro.`,
+      };
+    }
+
+    return {
+      type: "discard",
+      byName: item.discardedByName,
+      text: `${item.discardedByName} descartou uma carta.`,
+    };
+  });
+}
+
 function maybeFinishGame() {
   if (sessionState.game.phase !== "in_game") {
     return;
@@ -188,6 +206,7 @@ function getPublicState() {
       drawPileCount: sessionState.game.drawPile.length,
       boardPlacements: Object.values(sessionState.game.boardPlacements),
       discardPileCount: sessionState.game.discardPile.length,
+      discardActivity: buildDiscardActivity(),
       finalSummary: sessionState.game.phase === "ended" ? sessionState.game.finalSummary : null,
       hostHasCard: Boolean(sessionState.game.hands.host),
       guestHasCard: Boolean(sessionState.game.hands.guest),
@@ -254,6 +273,22 @@ function assignNewSlot(playerToken, socketId) {
   return null;
 }
 
+function takeOfflineSlot(playerToken, socketId) {
+  // Prioriza reaproveitar convidado offline para manter o host atual sempre que possivel.
+  const candidates = [sessionState.guest, sessionState.host];
+  const reusable = candidates.find((slot) => slot && !slot.online);
+
+  if (!reusable) {
+    return null;
+  }
+
+  reusable.playerToken = playerToken;
+  reusable.socketId = socketId;
+  reusable.online = true;
+  reusable.name = reusable.role === "host" ? "Host" : "Convidado";
+  return reusable;
+}
+
 io.on("connection", (socket) => {
   const rawToken = socket.handshake.auth && socket.handshake.auth.playerToken;
   const playerToken = typeof rawToken === "string" && rawToken.trim().length > 0 ? rawToken.trim() : null;
@@ -271,6 +306,10 @@ io.on("connection", (socket) => {
     slot.online = true;
   } else {
     slot = assignNewSlot(playerToken, socket.id);
+
+    if (!slot && sessionState.game.phase !== "in_game") {
+      slot = takeOfflineSlot(playerToken, socket.id);
+    }
   }
 
   if (!slot) {
