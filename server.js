@@ -101,6 +101,7 @@ const sessionState = {
     endedAt: null,
     matrix: null,
     drawPile: [],
+    boardPlacements: {},
     hands: {
       host: null,
       guest: null,
@@ -137,6 +138,7 @@ function getPublicState() {
       endedAt: sessionState.game.endedAt,
       matrix: sessionState.game.matrix,
       drawPileCount: sessionState.game.drawPile.length,
+      boardPlacements: Object.values(sessionState.game.boardPlacements),
       hostHasCard: Boolean(sessionState.game.hands.host),
       guestHasCard: Boolean(sessionState.game.hands.guest),
       canStart: hasHost && hasGuest && hostOnline && guestOnline && sessionState.game.phase === "lobby",
@@ -272,6 +274,7 @@ io.on("connection", (socket) => {
     sessionState.game.endedAt = null;
     sessionState.game.matrix = buildMatrixWords();
     sessionState.game.drawPile = buildCoordinateDeck();
+    sessionState.game.boardPlacements = {};
     sessionState.game.hands.host = null;
     sessionState.game.hands.guest = null;
     emitState();
@@ -307,6 +310,39 @@ io.on("connection", (socket) => {
     emitPrivateState();
   });
 
+  socket.on("card:place", () => {
+    const requester = getSlotByToken(playerToken);
+
+    if (!requester) {
+      return;
+    }
+
+    if (sessionState.game.phase !== "in_game") {
+      return;
+    }
+
+    const card = sessionState.game.hands[requester.role];
+    if (!card) {
+      return;
+    }
+
+    const coord = card.coord;
+    if (sessionState.game.boardPlacements[coord]) {
+      return;
+    }
+
+    sessionState.game.boardPlacements[coord] = {
+      coord,
+      placedByRole: requester.role,
+      placedByName: requester.name,
+      placedAt: Date.now(),
+    };
+
+    sessionState.game.hands[requester.role] = null;
+    emitState();
+    emitPrivateState();
+  });
+
   socket.on("game:end", () => {
     const requester = getSlotByToken(playerToken);
 
@@ -328,6 +364,7 @@ io.on("connection", (socket) => {
     sessionState.game.endedAt = null;
     sessionState.game.matrix = null;
     sessionState.game.drawPile = [];
+    sessionState.game.boardPlacements = {};
     sessionState.game.hands.host = null;
     sessionState.game.hands.guest = null;
     emitState();

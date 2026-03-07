@@ -35,6 +35,7 @@ const deckSection = document.getElementById("deckSection");
 const drawPileCount = document.getElementById("drawPileCount");
 const myCardValue = document.getElementById("myCardValue");
 const drawCardBtn = document.getElementById("drawCardBtn");
+const placeCardBtn = document.getElementById("placeCardBtn");
 const drawHint = document.getElementById("drawHint");
 
 let myRoleValue = null;
@@ -139,6 +140,11 @@ function renderBoard(game) {
 
   const cols = game.matrix.cols || [];
   const rows = game.matrix.rows || [];
+  const placements = {};
+
+  (game.boardPlacements || []).forEach((placement) => {
+    placements[placement.coord] = placement;
+  });
 
   const headCells = ['<th class="corner-cell">-</th>'];
   cols.forEach((col) => {
@@ -151,7 +157,16 @@ function renderBoard(game) {
   const bodyRows = rows
     .map((row) => {
       const cells = cols
-        .map((col) => `<td class="coord-cell" data-coord="${row.key}${col.key}">${row.key}${col.key}</td>`)
+        .map((col) => {
+          const coord = `${row.key}${col.key}`;
+          const placed = placements[coord];
+
+          if (!placed) {
+            return `<td class="coord-cell" data-coord="${coord}">${coord}</td>`;
+          }
+
+          return `<td class="coord-cell filled" data-coord="${coord}"><div>${coord}</div><div class="coord-mini">${placed.placedByName}</div></td>`;
+        })
         .join("");
 
       return `<tr><th class="row-header"><span class="row-key">${row.key}</span><span class="row-word">${row.word}</span></th>${cells}</tr>`;
@@ -169,6 +184,7 @@ function renderDeck(game) {
     drawPileCount.textContent = "0";
     myCardValue.textContent = "nenhuma";
     drawCardBtn.disabled = true;
+    placeCardBtn.disabled = true;
     drawHint.textContent = "Saque manual: nao existe ordem de turno.";
     return;
   }
@@ -179,9 +195,10 @@ function renderDeck(game) {
   const hasCard = Boolean(myPrivateCard);
   const canDraw = (game.drawPileCount || 0) > 0 && !hasCard;
   drawCardBtn.disabled = !canDraw;
+  placeCardBtn.disabled = !hasCard;
 
   if (hasCard) {
-    drawHint.textContent = "Voce ja tem uma carta. Nas proximas etapas ela podera ser jogada ou descartada.";
+    drawHint.textContent = "Voce ja tem uma carta. Se quiser, use Colocar no tabuleiro.";
     return;
   }
 
@@ -246,4 +263,8 @@ endGameBtn.addEventListener("click", () => {
 
 drawCardBtn.addEventListener("click", () => {
   socket.emit("card:draw");
+});
+
+placeCardBtn.addEventListener("click", () => {
+  socket.emit("card:place");
 });
