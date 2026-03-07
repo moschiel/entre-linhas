@@ -226,6 +226,11 @@ button:disabled {
   font-size: 0.9rem;
 }
 
+#summaryRating {
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
 .hint {
   color: var(--muted);
   font-size: 0.85rem;

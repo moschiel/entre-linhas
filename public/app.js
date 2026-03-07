@@ -42,6 +42,10 @@ const invalidateCardBtn = document.getElementById("invalidateCardBtn");
 const drawHint = document.getElementById("drawHint");
 const discardSection = document.getElementById("discardSection");
 const discardList = document.getElementById("discardList");
+const summarySection = document.getElementById("summarySection");
+const summaryRating = document.getElementById("summaryRating");
+const summaryCorrect = document.getElementById("summaryCorrect");
+const summaryDiscarded = document.getElementById("summaryDiscarded");
 
 let myRoleValue = null;
 let myPrivateCard = null;
@@ -96,7 +100,7 @@ function renderGameStatus(game) {
   }
 
   if (game.phase === "ended") {
-    gameStatus.textContent = "Encerrado";
+    gameStatus.textContent = "Encerrado (resultado pronto)";
     return;
   }
 
@@ -112,9 +116,10 @@ function renderActionButtons(state) {
 
   const isHost = myRoleValue === "host";
   const inGame = state.game.phase === "in_game";
+  const ended = state.game.phase === "ended";
 
   startGameBtn.disabled = !isHost || !state.game.canStart;
-  endGameBtn.disabled = !isHost || !inGame;
+  endGameBtn.disabled = !isHost || (!inGame && !ended);
 
   if (!isHost) {
     actionHint.textContent = "Apenas o host pode iniciar/encerrar a partida.";
@@ -122,6 +127,11 @@ function renderActionButtons(state) {
   }
 
   if (!state.game.canStart && !inGame) {
+    if (ended) {
+      actionHint.textContent = "Partida finalizada. Use Encerrar jogo para voltar ao lobby.";
+      return;
+    }
+
     actionHint.textContent = "Para iniciar, host e convidado precisam estar online.";
     return;
   }
@@ -135,7 +145,7 @@ function renderActionButtons(state) {
 }
 
 function renderBoard(game) {
-  const shouldShow = Boolean(game && game.phase === "in_game" && game.matrix);
+  const shouldShow = Boolean(game && (game.phase === "in_game" || game.phase === "ended") && game.matrix);
   boardSection.classList.toggle("hidden", !shouldShow);
 
   if (!shouldShow) {
@@ -202,9 +212,12 @@ function renderBoard(game) {
 
 function renderDeck(game) {
   const inGame = Boolean(game && game.phase === "in_game");
+  const ended = Boolean(game && game.phase === "ended");
+  const hasActiveRound = inGame || ended;
+
   deckSection.classList.toggle("hidden", !inGame);
 
-  if (!inGame) {
+  if (!hasActiveRound) {
     drawPileCount.textContent = "0";
     myCardValue.textContent = "nenhuma";
     drawCardBtn.disabled = true;
@@ -214,6 +227,10 @@ function renderDeck(game) {
     drawHint.textContent = "Saque manual: nao existe ordem de turno.";
     discardSection.classList.add("hidden");
     discardList.innerHTML = "";
+    summarySection.classList.add("hidden");
+    summaryRating.textContent = "-";
+    summaryCorrect.textContent = "0";
+    summaryDiscarded.textContent = "0";
     return;
   }
 
@@ -230,11 +247,39 @@ function renderDeck(game) {
   invalidateCardBtn.disabled = !selectedBoardCoord;
 
   const discardedCount = game.discardPileCount || 0;
+  const isEnded = ended;
   discardSection.classList.remove("hidden");
-  if (discardedCount === 0) {
+  if (!isEnded && discardedCount === 0) {
     discardList.innerHTML = "<li>Nenhuma carta descartada ainda.</li>";
-  } else {
+  } else if (!isEnded) {
     discardList.innerHTML = `<li>${discardedCount} carta(s) no descarte. Coordenadas ocultas ate o fim da partida.</li>`;
+  } else {
+    const finalDiscardPile = (game.finalSummary && game.finalSummary.discardPile) || [];
+    if (finalDiscardPile.length === 0) {
+      discardList.innerHTML = "<li>Nenhuma carta descartada nesta partida.</li>";
+    } else {
+      discardList.innerHTML = finalDiscardPile
+        .map((item) => {
+          if (item.source === "board") {
+            return `<li>${item.coord}: invalidada por ${item.discardedByName} (antes no tabuleiro de ${item.originallyPlacedByName}).</li>`;
+          }
+
+          return `<li>${item.coord}: descartada por ${item.discardedByName}.</li>`;
+        })
+        .join("");
+    }
+  }
+
+  if (isEnded && game.finalSummary) {
+    summarySection.classList.remove("hidden");
+    summaryRating.textContent = game.finalSummary.rating;
+    summaryCorrect.textContent = String(game.finalSummary.correctCount);
+    summaryDiscarded.textContent = String(game.finalSummary.discardedCount);
+  } else {
+    summarySection.classList.add("hidden");
+    summaryRating.textContent = "-";
+    summaryCorrect.textContent = "0";
+    summaryDiscarded.textContent = "0";
   }
 
   if (hasCard) {

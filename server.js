@@ -107,8 +107,55 @@ const sessionState = {
       host: null,
       guest: null,
     },
+    finalSummary: null,
   },
 };
+
+function classifyPerformance(correctCount) {
+  if (correctCount <= 10) {
+    return "Fracasso";
+  }
+
+  if (correctCount <= 18) {
+    return "Mediano";
+  }
+
+  if (correctCount <= 24) {
+    return "Bom";
+  }
+
+  return "Espetacular!";
+}
+
+function computeFinalSummary() {
+  const correctCount = Object.keys(sessionState.game.boardPlacements).length;
+  const discardedCount = sessionState.game.discardPile.length;
+
+  return {
+    correctCount,
+    discardedCount,
+    totalCards: 25,
+    rating: classifyPerformance(correctCount),
+    discardPile: sessionState.game.discardPile,
+  };
+}
+
+function maybeFinishGame() {
+  if (sessionState.game.phase !== "in_game") {
+    return;
+  }
+
+  const noCardsInHands = !sessionState.game.hands.host && !sessionState.game.hands.guest;
+  const pileEmpty = sessionState.game.drawPile.length === 0;
+
+  if (!noCardsInHands || !pileEmpty) {
+    return;
+  }
+
+  sessionState.game.phase = "ended";
+  sessionState.game.endedAt = Date.now();
+  sessionState.game.finalSummary = computeFinalSummary();
+}
 
 function slotToPublic(slot) {
   if (!slot) {
@@ -141,6 +188,7 @@ function getPublicState() {
       drawPileCount: sessionState.game.drawPile.length,
       boardPlacements: Object.values(sessionState.game.boardPlacements),
       discardPileCount: sessionState.game.discardPile.length,
+      finalSummary: sessionState.game.phase === "ended" ? sessionState.game.finalSummary : null,
       hostHasCard: Boolean(sessionState.game.hands.host),
       guestHasCard: Boolean(sessionState.game.hands.guest),
       canStart: hasHost && hasGuest && hostOnline && guestOnline && sessionState.game.phase === "lobby",
@@ -280,6 +328,7 @@ io.on("connection", (socket) => {
     sessionState.game.discardPile = [];
     sessionState.game.hands.host = null;
     sessionState.game.hands.guest = null;
+    sessionState.game.finalSummary = null;
     emitState();
     emitPrivateState();
   });
@@ -342,6 +391,7 @@ io.on("connection", (socket) => {
     };
 
     sessionState.game.hands[requester.role] = null;
+    maybeFinishGame();
     emitState();
     emitPrivateState();
   });
@@ -371,6 +421,7 @@ io.on("connection", (socket) => {
     });
 
     sessionState.game.hands[requester.role] = null;
+    maybeFinishGame();
     emitState();
     emitPrivateState();
   });
@@ -418,15 +469,11 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (sessionState.game.phase !== "in_game") {
+    if (sessionState.game.phase !== "in_game" && sessionState.game.phase !== "ended") {
       return;
     }
 
-    sessionState.game.phase = "ended";
-    sessionState.game.endedAt = Date.now();
-    emitState();
-
-    // Etapa 2: encerrar volta para o estado inicial de sessao, mantendo os jogadores conectados.
+    // Encerrar jogo volta para o estado inicial de sessao, mantendo os jogadores conectados.
     sessionState.game.phase = "lobby";
     sessionState.game.startedAt = null;
     sessionState.game.endedAt = null;
@@ -436,6 +483,7 @@ io.on("connection", (socket) => {
     sessionState.game.discardPile = [];
     sessionState.game.hands.host = null;
     sessionState.game.hands.guest = null;
+    sessionState.game.finalSummary = null;
     emitState();
     emitPrivateState();
   });
