@@ -9,7 +9,7 @@
   <body>
     <main class="screen">
       <h1>Entre Linhas</h1>
-      <p class="subtitle">Etapa 3: matriz 5x5 com palavras sorteadas</p>
+      <!-- <p class="subtitle">Etapa 3: matriz 5x5 com palavras sorteadas</p> -->
 
       <section class="card">
         <p><strong>Seu papel:</strong> <span id="myRole">Conectando...</span></p>
@@ -28,8 +28,8 @@
       </section>
 
       <section id="boardSection" class="card hidden">
-        <h2>Matriz 5x5</h2>
-        <p class="hint">Linhas: A-E com palavra da linha. Colunas: 1-5 com palavra da coluna.</p>
+        <!-- <h2>Matriz 5x5</h2> -->
+        <!-- <p class="hint">Linhas: A-E com palavra da linha. Colunas: 1-5 com palavra da coluna.</p> -->
 
         <div class="matrix-wrap">
           <table class="matrix-table" aria-label="Matriz de coordenadas">
@@ -47,7 +47,7 @@
         <h2>Cartas</h2>
         <p><strong>Pilha restante:</strong> <span id="drawPileCount">0</span></p>
         <p><strong>Sua carta atual:</strong> <span id="myCardValue">nenhuma</span></p>
-        <p><strong>Selecionada no tabuleiro:</strong> <span id="selectedCoord">nenhuma</span></p>
+        <p hidden><strong>Selecionada no tabuleiro:</strong> <span id="selectedCoord">nenhuma</span></p>
         <div class="actions-row">
           <button id="drawCardBtn" disabled>Sacar carta</button>
           <button id="placeCardBtn" disabled>Colocar no tabuleiro</button>
@@ -56,7 +56,7 @@
           <button id="discardCardBtn" class="danger-soft" disabled>Descartar carta</button>
           <button id="invalidateCardBtn" class="danger" disabled>Invalidar selecionada</button>
         </div>
-        <p id="drawHint" class="hint">Saque manual: nao existe ordem de turno.</p>
+        <p hidden id="drawHint" class="hint">Saque manual: nao existe ordem de turno.</p>
       </section>
 
       <section id="discardSection" class="card hidden">

@@ -95,6 +95,7 @@ socket.on("session:assigned", (payload) => {
   }
 
   connectionStatus.textContent = "Conectado";
+  connectionStatus.style.color = "green";
 });
 
 function renderGameStatus(game) {
@@ -105,11 +106,13 @@ function renderGameStatus(game) {
 
   if (game.phase === "in_game") {
     gameStatus.textContent = game.pausedByDisconnect ? "Em jogo (pausado por desconexao)" : "Em jogo";
+    gameStatus.style.color = game.pausedByDisconnect ? "red" : "green";
     return;
   }
 
   if (game.phase === "ended") {
     gameStatus.textContent = "Encerrado (resultado pronto)";
+    gameStatus.style.color = "gray";
     return;
   }
 
@@ -219,6 +222,10 @@ function renderBoard(game) {
   });
 }
 
+function syncButtonVisibility(button) {
+  button.classList.toggle("hidden", button.disabled);
+}
+
 function renderDeck(game) {
   const inGame = Boolean(game && game.phase === "in_game");
   const ended = Boolean(game && game.phase === "ended");
@@ -233,6 +240,10 @@ function renderDeck(game) {
     placeCardBtn.disabled = true;
     discardCardBtn.disabled = true;
     invalidateCardBtn.disabled = true;
+    syncButtonVisibility(drawCardBtn);
+    syncButtonVisibility(placeCardBtn);
+    syncButtonVisibility(discardCardBtn);
+    syncButtonVisibility(invalidateCardBtn);
     drawHint.textContent = "Saque manual: nao existe ordem de turno.";
     discardSection.classList.add("hidden");
     discardList.innerHTML = "";
@@ -249,11 +260,14 @@ function renderDeck(game) {
   const hasCard = Boolean(myPrivateCard);
   const canDraw = (game.drawPileCount || 0) > 0 && !hasCard;
   const isHost = myRoleValue === "host";
-  invalidateCardBtn.classList.toggle("hidden", !isHost);
   drawCardBtn.disabled = !canDraw;
   placeCardBtn.disabled = !hasCard;
   discardCardBtn.disabled = !hasCard;
-  invalidateCardBtn.disabled = !selectedBoardCoord;
+  invalidateCardBtn.disabled = !isHost || !selectedBoardCoord;
+  syncButtonVisibility(drawCardBtn);
+  syncButtonVisibility(placeCardBtn);
+  syncButtonVisibility(discardCardBtn);
+  syncButtonVisibility(invalidateCardBtn);
 
   const discardedCount = game.discardPileCount || 0;
   const isEnded = ended;
@@ -318,8 +332,10 @@ socket.on("state:update", (state) => {
 
   if (state.connectedCount === state.capacity) {
     roomStatus.textContent = "Sala completa";
+    roomStatus.style.color = "green";
   } else {
     roomStatus.textContent = `Aguardando jogador (${state.connectedCount}/${state.capacity})`;
+    roomStatus.style.color = "orange";
   }
 });
 
@@ -327,24 +343,29 @@ socket.on("session:full", () => {
   fullWarning.classList.remove("hidden");
   myRole.textContent = "Sem vaga";
   roomStatus.textContent = "Sala cheia";
+  roomStatus.style.color = "red";
   startGameBtn.disabled = true;
   endGameBtn.disabled = true;
 });
 
 socket.on("connect_error", () => {
   connectionStatus.textContent = "Falha de conexao";
+  connectionStatus.style.color = "red";
 });
 
 socket.on("disconnect", () => {
   connectionStatus.textContent = "Desconectado - tentando reconectar";
+  connectionStatus.style.color = "orange";
 });
 
 socket.io.on("reconnect_attempt", () => {
   connectionStatus.textContent = "Reconectando...";
+  connectionStatus.style.color = "orange";
 });
 
 socket.io.on("reconnect", () => {
   connectionStatus.textContent = "Reconectado";
+  connectionStatus.style.color = "green";
 });
 
 socket.on("state:private", (state) => {

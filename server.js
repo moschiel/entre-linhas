@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const os = require("os");
 const { Server } = require("socket.io");
 
 const PORT = process.env.PORT || 3000;
@@ -541,5 +542,23 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor ativo em http://0.0.0.0:${PORT}`);
+  const interfaces = os.networkInterfaces();
+  const lanUrls = [];
+
+  Object.values(interfaces).forEach((entries) => {
+    (entries || []).forEach((entry) => {
+      if (entry && entry.family === "IPv4" && !entry.internal) {
+        lanUrls.push(`http://${entry.address}:${PORT}`);
+      }
+    });
+  });
+
+  console.log(`Servidor ativo em http://localhost:${PORT}`);
+
+  if (lanUrls.length > 0) {
+    console.log("Acesso na rede local:");
+    lanUrls.forEach((url) => {
+      console.log(`- ${url}`);
+    });
+  }
 });
