@@ -1,7 +1,12 @@
 (function initActionsModule(global) {
+  const DRAW_ANIM_MS = 1000;
+  const DRAW_ANIM_BUFFER_MS = 100;
+
   function bindUiActions(socket, deps) {
     const { dom, gameState, storage, render } = deps;
     let drawInFlight = false;
+    let activeFlightCoordEl = null;
+    document.documentElement.style.setProperty("--draw-anim-ms", `${DRAW_ANIM_MS}ms`);
 
     function canDrawFromPile() {
       const game = gameState.lastGameState;
@@ -31,15 +36,28 @@
       const target = dom.deckCurrentVisual.getBoundingClientRect();
       const ghost = document.createElement("div");
       ghost.className = "draw-flight-card";
+      ghost.innerHTML = `
+        <div class="draw-flight-inner">
+          <div class="draw-flight-face draw-flight-back"></div>
+          <div class="draw-flight-face draw-flight-front"><span class="draw-flight-coord">--</span></div>
+        </div>
+      `;
       ghost.style.left = `${source.left}px`;
       ghost.style.top = `${source.top}px`;
       ghost.style.width = `${source.width}px`;
       ghost.style.height = `${source.height}px`;
       document.body.appendChild(ghost);
+      activeFlightCoordEl = ghost.querySelector(".draw-flight-coord");
 
       const deltaX = target.left - source.left;
       const deltaY = target.top - source.top;
+      let isDone = false;
       const cleanup = () => {
+        if (isDone) {
+          return;
+        }
+        isDone = true;
+        activeFlightCoordEl = null;
         ghost.removeEventListener("transitionend", handleEnd);
         if (ghost.parentNode) {
           ghost.parentNode.removeChild(ghost);
@@ -50,12 +68,26 @@
 
       ghost.addEventListener("transitionend", handleEnd);
       window.requestAnimationFrame(() => {
+        ghost.classList.add("is-flipping");
         ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.94)`;
-        ghost.style.opacity = "0.2";
+        ghost.style.opacity = "0.96";
       });
 
-      window.setTimeout(cleanup, 600);
+      window.setTimeout(cleanup, DRAW_ANIM_MS + DRAW_ANIM_BUFFER_MS);
     }
+
+    window.addEventListener("entrelinhas:private-card", (event) => {
+      if (!drawInFlight || !activeFlightCoordEl) {
+        return;
+      }
+
+      const card = event && event.detail ? event.detail.card : null;
+      if (!card || !card.coord) {
+        return;
+      }
+
+      activeFlightCoordEl.textContent = card.coord;
+    });
 
     dom.saveNameBtn.addEventListener("click", () => {
       const name = dom.nameInput.value.trim();
@@ -82,9 +114,9 @@
 
       drawInFlight = true;
       animateDrawFlight(() => {
-        socket.emit("card:draw");
         drawInFlight = false;
       });
+      socket.emit("card:draw");
     });
 
     dom.placeCardBtn.addEventListener("click", () => {

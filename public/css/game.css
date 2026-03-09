@@ -139,15 +139,54 @@
 
 .draw-flight-card {
   position: fixed;
+  perspective: 800px;
+  transform: translate(0, 0) scale(1);
+  opacity: 1;
+  transition: transform var(--draw-anim-ms, 560ms) ease, opacity var(--draw-anim-ms, 560ms) ease;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.draw-flight-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform var(--draw-anim-ms, 560ms) ease;
+}
+
+.draw-flight-card.is-flipping .draw-flight-inner {
+  transform: rotateY(180deg);
+}
+
+.draw-flight-face {
+  position: absolute;
+  inset: 0;
   border-radius: 7px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.draw-flight-back {
   border: 1px solid #6e8f78;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   background:
     radial-gradient(circle at center, #2d4d3a 0 12px, transparent 13px),
     linear-gradient(145deg, #8fc3a7 0%, #74ae91 45%, #659f83 100%);
-  transform: translate(0, 0) scale(1);
-  opacity: 1;
-  transition: transform 500ms ease, opacity 500ms ease;
-  pointer-events: none;
-  z-index: 9999;
+}
+
+.draw-flight-front {
+  transform: rotateY(180deg);
+  border: 1px solid #5fa07e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  background: linear-gradient(160deg, #f8fdf9 0%, #dff2e5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.draw-flight-coord {
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  color: #1f5c40;
+  font-size: 0.92rem;
 }

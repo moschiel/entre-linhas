@@ -86,6 +86,11 @@
     socket.on("state:private", (state) => {
       gameState.myPrivateCard = state ? state.myCard : null;
       render.renderDeck(dom, gameState, gameState.lastGameState);
+      window.dispatchEvent(new CustomEvent("entrelinhas:private-card", {
+        detail: {
+          card: gameState.myPrivateCard,
+        },
+      }));
     });
   }
 
