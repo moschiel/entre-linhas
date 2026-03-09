@@ -229,6 +229,7 @@
     dom.tableSideSection.classList.toggle("hidden", !hasActiveRound);
 
     if (!hasActiveRound) {
+      gameState.drawFlightsByRole = {};
       dom.deckPileCountLabel.textContent = "0";
       dom.myCardValue.textContent = "nenhuma";
       PLAYER_ROLE_ORDER.forEach((role) => {
@@ -283,9 +284,13 @@
       const isMe = role === gameState.myRoleValue;
       const roleHasCard = Boolean(player && player.hasCard);
       const shouldShowMyCard = isMe && hasCard;
+      const roleFlightInProgress = Boolean(gameState.drawFlightsByRole && gameState.drawFlightsByRole[role]);
       visual.classList.remove("facedown");
 
-      if (shouldShowMyCard) {
+      if (roleFlightInProgress) {
+        visual.textContent = "--";
+        visual.classList.remove("filled");
+      } else if (shouldShowMyCard) {
         visual.textContent = gameState.myPrivateCard.coord;
         visual.classList.add("filled");
       } else if (isMe) {

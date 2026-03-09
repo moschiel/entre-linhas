@@ -6,6 +6,8 @@
     lastPublicState: null,
     selectedBoardCoord: null,
     drawFlightInProgress: false,
+    drawFlightsByRole: {},
+    roleHasCardMap: {},
     isHost() {
       return this.myRoleValue === "host";
     },

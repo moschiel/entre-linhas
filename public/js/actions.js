@@ -74,6 +74,7 @@
       ghost.style.height = `${snap(source.height)}px`;
       document.body.appendChild(ghost);
       activeFlightCoordEl = ghost.querySelector(".draw-flight-coord");
+      const ghostInner = ghost.querySelector(".draw-flight-inner");
 
       let isDone = false;
       const cleanup = () => {
@@ -93,17 +94,65 @@
       };
       const handleEnd = () => cleanup();
 
-      ghost.addEventListener("transitionend", handleEnd);
-      window.requestAnimationFrame(() => {
-        if (revealForSelf) {
-          ghost.classList.add("is-flipping");
+      // Mobile: WAAPI costuma ser mais confiavel que transition em left/top.
+      if (typeof ghost.animate === "function") {
+        ghost.style.transition = "none";
+        if (ghostInner) {
+          ghostInner.style.transition = "none";
         }
-        ghost.style.left = `${snap(target.left)}px`;
-        ghost.style.top = `${snap(target.top)}px`;
-        ghost.style.width = `${snap(target.width)}px`;
-        ghost.style.height = `${snap(target.height)}px`;
-        ghost.style.opacity = "0.96";
-      });
+
+        const movement = ghost.animate(
+          [
+            {
+              left: `${snap(source.left)}px`,
+              top: `${snap(source.top)}px`,
+              width: `${snap(source.width)}px`,
+              height: `${snap(source.height)}px`,
+              opacity: 1,
+            },
+            {
+              left: `${snap(target.left)}px`,
+              top: `${snap(target.top)}px`,
+              width: `${snap(target.width)}px`,
+              height: `${snap(target.height)}px`,
+              opacity: 0.96,
+            },
+          ],
+          {
+            duration: DRAW_ANIM_MS,
+            easing: "ease",
+            fill: "forwards",
+          },
+        );
+
+        if (revealForSelf && ghostInner && typeof ghostInner.animate === "function") {
+          ghostInner.animate(
+            [
+              { transform: "rotateY(0deg)" },
+              { transform: "rotateY(180deg)" },
+            ],
+            {
+              duration: DRAW_ANIM_MS,
+              easing: "ease",
+              fill: "forwards",
+            },
+          );
+        }
+
+        movement.finished.then(cleanup).catch(() => {});
+      } else {
+        ghost.addEventListener("transitionend", handleEnd);
+        window.requestAnimationFrame(() => {
+          if (revealForSelf) {
+            ghost.classList.add("is-flipping");
+          }
+          ghost.style.left = `${snap(target.left)}px`;
+          ghost.style.top = `${snap(target.top)}px`;
+          ghost.style.width = `${snap(target.width)}px`;
+          ghost.style.height = `${snap(target.height)}px`;
+          ghost.style.opacity = "0.96";
+        });
+      }
 
       window.setTimeout(cleanup, DRAW_ANIM_MS + DRAW_ANIM_BUFFER_MS);
     }
@@ -126,22 +175,33 @@
       if (!role) {
         return;
       }
+      if (gameState.drawFlightsByRole[role]) {
+        return;
+      }
 
       if (role === gameState.myRoleValue) {
         gameState.drawFlightInProgress = true;
+        gameState.drawFlightsByRole[role] = true;
         render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
         animateDrawFlight(role, {
           revealForSelf: true,
           onDone: () => {
             gameState.drawFlightInProgress = false;
+            gameState.drawFlightsByRole[role] = false;
             render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
           },
         });
         return;
       }
 
+      gameState.drawFlightsByRole[role] = true;
+      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
       animateDrawFlight(role, {
         revealForSelf: false,
+        onDone: () => {
+          gameState.drawFlightsByRole[role] = false;
+          render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+        },
       });
     });
 

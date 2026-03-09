@@ -85,6 +85,25 @@
 
     socket.on("state:update", (state) => {
       const normalizedState = normalizeState(state);
+      const nextRoleHasCardMap = {};
+      (normalizedState.players || []).forEach((player) => {
+        nextRoleHasCardMap[player.role] = Boolean(player.hasCard);
+      });
+      const previousRoleHasCardMap = gameState.roleHasCardMap || {};
+
+      (normalizedState.players || []).forEach((player) => {
+        const hadCard = Boolean(previousRoleHasCardMap[player.role]);
+        const hasCardNow = Boolean(player.hasCard);
+        if (!hadCard && hasCardNow) {
+          window.dispatchEvent(new CustomEvent("entrelinhas:card-drawn", {
+            detail: {
+              role: player.role,
+            },
+          }));
+        }
+      });
+
+      gameState.roleHasCardMap = nextRoleHasCardMap;
       gameState.lastPublicState = normalizedState;
       gameState.lastGameState = normalizedState.game || null;
       const disconnectedPlayer = (normalizedState.players || []).find((player) => player.occupied && !player.online) || null;
@@ -151,6 +170,7 @@
         },
       }));
     });
+
   }
 
   global.EntreLinhasSocket = {
