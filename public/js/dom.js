@@ -20,6 +20,8 @@
       deckSection: document.getElementById("deckSection"),
       drawPileCount: document.getElementById("drawPileCount"),
       myCardValue: document.getElementById("myCardValue"),
+      deckPileVisual: document.getElementById("deckPileVisual"),
+      deckCurrentVisual: document.getElementById("deckCurrentVisual"),
       selectedCoord: document.getElementById("selectedCoord"),
       drawCardBtn: document.getElementById("drawCardBtn"),
       placeCardBtn: document.getElementById("placeCardBtn"),

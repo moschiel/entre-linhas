@@ -17,6 +17,20 @@
     element.disabled = !visible;
   }
 
+  function renderDeckPileVisual(dom, pileCount) {
+    dom.deckPileVisual.innerHTML = "";
+    dom.deckPileVisual.classList.toggle("empty", pileCount === 0);
+
+    for (let i = pileCount - 1; i >= 0; i -= 1) {
+      const card = document.createElement("div");
+      card.className = "deck-pile-card";
+      card.style.top = `${i}px`;
+      card.style.left = `${i}px`;
+      card.style.zIndex = String(pileCount - i);
+      dom.deckPileVisual.appendChild(card);
+    }
+  }
+
   function renderGameStatus(dom, game, statusContext) {
     if (!game) {
       dom.gameStatus.textContent = "Lobby";
@@ -174,6 +188,9 @@
     if (!hasActiveRound) {
       dom.drawPileCount.textContent = "0";
       dom.myCardValue.textContent = "nenhuma";
+      dom.deckCurrentVisual.textContent = "--";
+      dom.deckCurrentVisual.classList.remove("filled");
+      renderDeckPileVisual(dom, 0);
       syncElementVisibility(dom.drawCardBtn, false);
       syncElementVisibility(dom.placeCardBtn, false);
       syncElementVisibility(dom.discardCardBtn, false);
@@ -190,9 +207,13 @@
 
     dom.drawPileCount.textContent = String(game.drawPileCount || 0);
     dom.myCardValue.textContent = gameState.myPrivateCard ? gameState.myPrivateCard.coord : "nenhuma";
+    const pileCount = Number(game.drawPileCount || 0);
+    renderDeckPileVisual(dom, pileCount);
+    dom.deckCurrentVisual.textContent = gameState.myPrivateCard ? gameState.myPrivateCard.coord : "--";
+    dom.deckCurrentVisual.classList.toggle("filled", Boolean(gameState.myPrivateCard));
 
     const hasCard = Boolean(gameState.myPrivateCard);
-    const canDraw = (game.drawPileCount || 0) > 0 && !hasCard;
+    const canDraw = pileCount > 0 && !hasCard;
 
     syncElementVisibility(dom.drawCardBtn, canDraw);
     syncElementVisibility(dom.placeCardBtn, hasCard);
