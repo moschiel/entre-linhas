@@ -1,4 +1,33 @@
 (function initRenderModule(global) {
+  const PLAYER_ROLE_ORDER = ["host", "guest", "player3", "player4"];
+
+  function getPlayerStatusElements(dom) {
+    return {
+      host: dom.playerStateHost,
+      guest: dom.playerStateGuest,
+      player3: dom.playerStatePlayer3,
+      player4: dom.playerStatePlayer4,
+    };
+  }
+
+  function getCardLabelElements(dom) {
+    return {
+      host: dom.currentCardLabelHost,
+      guest: dom.currentCardLabelGuest,
+      player3: dom.currentCardLabelPlayer3,
+      player4: dom.currentCardLabelPlayer4,
+    };
+  }
+
+  function getCardVisualElements(dom) {
+    return {
+      host: dom.currentCardHostVisual,
+      guest: dom.currentCardGuestVisual,
+      player3: dom.currentCardPlayer3Visual,
+      player4: dom.currentCardPlayer4Visual,
+    };
+  }
+
   function formatSlot(slot) {
     if (!slot) {
       return "vazio";
@@ -27,6 +56,7 @@
       card.style.top = `${i}px`;
       card.style.left = `${i}px`;
       card.style.zIndex = String(pileCount - i);
+      card.textContent = "";
       container.appendChild(card);
     }
   }
@@ -39,12 +69,15 @@
 
     if (game.phase === "in_game") {
       const disconnectedRole = statusContext && statusContext.disconnectedRole;
+      const disconnectedName = statusContext && statusContext.disconnectedName;
       const myRole = statusContext && statusContext.myRole;
 
       if (game.pausedByDisconnect && disconnectedRole && myRole && disconnectedRole === myRole) {
         dom.gameStatus.textContent = "Em jogo: aguardando reconexao";
+      } else if (game.pausedByDisconnect && disconnectedName) {
+        dom.gameStatus.textContent = `Em jogo: aguardando ${disconnectedName} se reconectar`;
       } else if (game.pausedByDisconnect && disconnectedRole) {
-        dom.gameStatus.textContent = "Em jogo: aguardando o outro jogador se reconectar";
+        dom.gameStatus.textContent = "Em jogo: aguardando jogador se reconectar";
       } else {
         dom.gameStatus.textContent = game.pausedByDisconnect ? "Em jogo (pausado por desconexao)" : "Em jogo";
       }
@@ -93,7 +126,7 @@
         return;
       }
 
-      dom.actionHint.textContent = "Para iniciar, host e convidado precisam estar online.";
+      dom.actionHint.textContent = "Para iniciar, os jogadores conectados precisam estar online.";
       return;
     }
 
@@ -102,7 +135,7 @@
       return;
     }
 
-    dom.actionHint.textContent = "Pronto para iniciar quando os 2 estiverem online.";
+    dom.actionHint.textContent = "Pronto para iniciar quando houver pelo menos 2 jogadores online.";
   }
 
   function renderBoard(dom, gameState, game) {
@@ -172,26 +205,40 @@
 
           dom.selectedCoord.textContent = gameState.selectedBoardCoord || "nenhuma";
           renderBoard(dom, gameState, game);
-          renderDeck(dom, gameState, gameState.lastGameState);
+          renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
         });
       });
     }
   }
 
-  function renderDeck(dom, gameState, game) {
+  function renderDeck(dom, gameState, game, fullState) {
     const inGame = Boolean(game && game.phase === "in_game");
     const ended = Boolean(game && game.phase === "ended");
     const hasActiveRound = inGame || ended;
+    const players = fullState && Array.isArray(fullState.players) ? fullState.players : [];
+    const playerByRole = {};
+    players.forEach((player) => {
+      playerByRole[player.role] = player;
+    });
+    const cardVisuals = getCardVisualElements(dom);
+    const cardLabels = getCardLabelElements(dom);
 
     dom.deckSection.classList.toggle("hidden", !inGame);
-    dom.tableCurrentSection.classList.toggle("hidden", !hasActiveRound);
+    dom.tableLeftPlayersSection.classList.toggle("hidden", !hasActiveRound);
+    dom.tableRightPlayersSection.classList.toggle("hidden", !hasActiveRound);
     dom.tableSideSection.classList.toggle("hidden", !hasActiveRound);
 
     if (!hasActiveRound) {
       dom.deckPileCountLabel.textContent = "0";
       dom.myCardValue.textContent = "nenhuma";
-      dom.deckCurrentVisual.textContent = "--";
-      dom.deckCurrentVisual.classList.remove("filled");
+      PLAYER_ROLE_ORDER.forEach((role) => {
+        const visual = cardVisuals[role];
+        if (!visual) {
+          return;
+        }
+        visual.textContent = "--";
+        visual.classList.remove("filled", "facedown");
+      });
       renderDeckPileVisual(dom.deckPileVisual, 0);
       renderDeckPileVisual(dom.discardPileVisual, 0);
       syncElementVisibility(dom.drawCardBtn, false);
@@ -216,8 +263,42 @@
     const discardedCount = Number(game.discardPileCount || 0);
     renderDeckPileVisual(dom.deckPileVisual, pileCount);
     renderDeckPileVisual(dom.discardPileVisual, discardedCount);
-    dom.deckCurrentVisual.textContent = hasCard ? gameState.myPrivateCard.coord : "--";
-    dom.deckCurrentVisual.classList.toggle("filled", hasCard);
+
+    PLAYER_ROLE_ORDER.forEach((role) => {
+      const visual = cardVisuals[role];
+      const label = cardLabels[role];
+      if (!visual || !label) {
+        return;
+      }
+
+      const player = playerByRole[role];
+      if (player && player.occupied) {
+        label.textContent = player.online ? player.name : `${player.name} (offline)`;
+        label.classList.toggle("player-offline", !player.online);
+      } else {
+        label.textContent = player ? player.defaultName : role;
+        label.classList.remove("player-offline");
+      }
+
+      const isMe = role === gameState.myRoleValue;
+      const roleHasCard = Boolean(player && player.hasCard);
+      const shouldShowMyCard = isMe && hasCard;
+      visual.classList.remove("facedown");
+
+      if (shouldShowMyCard) {
+        visual.textContent = gameState.myPrivateCard.coord;
+        visual.classList.add("filled");
+      } else if (isMe) {
+        visual.textContent = "--";
+        visual.classList.remove("filled");
+      } else if (roleHasCard) {
+        visual.textContent = "";
+        visual.classList.add("filled", "facedown");
+      } else {
+        visual.textContent = "--";
+        visual.classList.remove("filled");
+      }
+    });
 
     const canDraw = pileCount > 0 && !hasCard;
     dom.deckPileVisual.classList.toggle("can-draw", canDraw);
@@ -276,29 +357,56 @@
       return;
     }
 
-    dom.drawHint.textContent = "Saque quando quiser. Os dois jogadores podem sacar em paralelo.";
+    dom.drawHint.textContent = "Saque quando quiser. Ate 4 jogadores podem sacar em paralelo.";
   }
 
   function renderRoomStatus(dom, state) {
-    const connectedCount = state.connectedCount;
-    const capacity = state.capacity;
+    const connectedCount = Number.isFinite(state.connectedCount) ? state.connectedCount : 0;
+    const capacity = Number.isFinite(state.capacity) ? state.capacity : 4;
     const canStart = Boolean(state.game && state.game.canStart);
     const inLobby = Boolean(state.game && state.game.phase === "lobby");
 
-    if (connectedCount === capacity && canStart && inLobby) {
+    if (canStart && inLobby) {
       dom.roomStatus.textContent = "Aguardando Host iniciar o Jogo";
       dom.roomStatus.style.color = "orange";
       return;
     }
 
-    if (connectedCount === capacity) {
+    if (capacity > 0 && connectedCount >= capacity) {
       dom.roomStatus.textContent = "Sala completa";
       dom.roomStatus.style.color = "green";
       return;
     }
 
-    dom.roomStatus.textContent = `Aguardando jogador (${connectedCount}/${capacity})`;
+    dom.roomStatus.textContent = `Aguardando jogadores (${connectedCount}/${capacity})`;
     dom.roomStatus.style.color = "orange";
+  }
+
+  function renderPlayers(dom, state) {
+    const gamePhase = state && state.game ? state.game.phase : "lobby";
+    dom.playersSection.classList.toggle("hidden", gamePhase !== "lobby");
+
+    const players = state && Array.isArray(state.players) ? state.players : [];
+    const playerByRole = {};
+    players.forEach((player) => {
+      playerByRole[player.role] = player;
+    });
+
+    const statusElements = getPlayerStatusElements(dom);
+    PLAYER_ROLE_ORDER.forEach((role) => {
+      const target = statusElements[role];
+      if (!target) {
+        return;
+      }
+
+      const player = playerByRole[role];
+      if (!player || !player.occupied) {
+        target.textContent = "vazio";
+        return;
+      }
+
+      target.textContent = formatSlot(player);
+    });
   }
 
   global.EntreLinhasRender = {
@@ -307,6 +415,7 @@
     renderActionButtons,
     renderBoard,
     renderDeck,
+    renderPlayers,
     renderRoomStatus,
   };
 })(window);

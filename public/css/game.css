@@ -21,6 +21,11 @@
   color: var(--muted);
 }
 
+.deck-visual-label.player-offline {
+  color: #a34f4f;
+  font-weight: 700;
+}
+
 .deck-pile-panel,
 .deck-current-panel {
   background: linear-gradient(180deg, #f6fbf7 0%, #edf6ef 100%);
@@ -30,8 +35,10 @@
   min-height: 126px;
 }
 
-.table-current-wrap {
-  display: block;
+.table-current-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .deck-pile-visual {
@@ -101,6 +108,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   background: linear-gradient(160deg, #f8fdf9 0%, #dff2e5 100%);
   color: #1f5c40;
+}
+
+.deck-current-visual.facedown {
+  border: 1px solid #6e8f78;
+  background:
+    radial-gradient(circle at center, #2d4d3a 0 12px, transparent 13px),
+    linear-gradient(145deg, #8fc3a7 0%, #74ae91 45%, #659f83 100%);
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 1.2px;
 }
 
 #myCardValue {

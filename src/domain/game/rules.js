@@ -1,13 +1,14 @@
 const { buildMatrixWords, buildCoordinateDeck } = require("./deck");
 const { computeFinalSummary } = require("./summary");
 const { resetGameToLobby } = require("./sessionState");
+const { PLAYER_SLOTS } = require("../../session/playerSlots");
 
 function maybeFinishGame(sessionState) {
   if (sessionState.game.phase !== "in_game") {
     return;
   }
 
-  const noCardsInHands = !sessionState.game.hands.host && !sessionState.game.hands.guest;
+  const noCardsInHands = PLAYER_SLOTS.every((slot) => !sessionState.game.hands[slot.role]);
   const pileEmpty = sessionState.game.drawPile.length === 0;
 
   if (!noCardsInHands || !pileEmpty) {
@@ -27,8 +28,9 @@ function startGame(sessionState) {
   sessionState.game.drawPile = buildCoordinateDeck();
   sessionState.game.boardPlacements = {};
   sessionState.game.discardPile = [];
-  sessionState.game.hands.host = null;
-  sessionState.game.hands.guest = null;
+  PLAYER_SLOTS.forEach((slot) => {
+    sessionState.game.hands[slot.role] = null;
+  });
   sessionState.game.finalSummary = null;
 }
 

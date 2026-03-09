@@ -1,29 +1,28 @@
 const { buildDiscardActivity } = require("./summary");
-
-function slotToPublic(slot) {
-  if (!slot) {
-    return null;
-  }
-
-  return {
-    role: slot.role,
-    name: slot.name,
-    online: slot.online,
-  };
-}
+const { PLAYER_SLOTS, getAssignedSlots } = require("../../session/playerSlots");
 
 function getPublicState(sessionState) {
-  const hasHost = Boolean(sessionState.host);
-  const hasGuest = Boolean(sessionState.guest);
-  const hostOnline = Boolean(sessionState.host && sessionState.host.online);
-  const guestOnline = Boolean(sessionState.guest && sessionState.guest.online);
+  const assignedSlots = getAssignedSlots(sessionState);
+  const connectedSlots = assignedSlots.filter((slot) => slot.online);
+  const everyoneOnline = assignedSlots.every((slot) => slot.online);
+  const canStartByPlayers = connectedSlots.length >= 2;
   const game = sessionState.game;
+  const players = PLAYER_SLOTS.map((slotDef) => {
+    const slot = sessionState[slotDef.role];
+    return {
+      role: slotDef.role,
+      defaultName: slotDef.defaultName,
+      name: slot ? slot.name : slotDef.defaultName,
+      online: Boolean(slot && slot.online),
+      occupied: Boolean(slot),
+      hasCard: Boolean(game.hands[slotDef.role]),
+    };
+  });
 
   return {
-    host: slotToPublic(sessionState.host),
-    guest: slotToPublic(sessionState.guest),
-    connectedCount: [sessionState.host, sessionState.guest].filter((slot) => slot && slot.online).length,
-    capacity: 2,
+    players,
+    connectedCount: connectedSlots.length,
+    capacity: PLAYER_SLOTS.length,
     game: {
       phase: game.phase,
       startedAt: game.startedAt,
@@ -34,10 +33,8 @@ function getPublicState(sessionState) {
       discardPileCount: game.discardPile.length,
       discardActivity: buildDiscardActivity(game.discardPile),
       finalSummary: game.phase === "ended" ? game.finalSummary : null,
-      hostHasCard: Boolean(game.hands.host),
-      guestHasCard: Boolean(game.hands.guest),
-      canStart: hasHost && hasGuest && hostOnline && guestOnline && game.phase === "lobby",
-      pausedByDisconnect: game.phase === "in_game" && (!hostOnline || !guestOnline),
+      canStart: canStartByPlayers && game.phase === "lobby",
+      pausedByDisconnect: game.phase === "in_game" && !everyoneOnline,
     },
   };
 }

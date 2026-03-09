@@ -1,4 +1,5 @@
 const {
+  getAssignedSlots,
   getSlotByToken,
   assignNewSlot,
   takeOfflineSlot,
@@ -38,7 +39,7 @@ function registerSocketHandlers(io, sessionState) {
     }
 
     if (!slot) {
-      socket.emit("session:full", "A sala ja esta cheia (2 jogadores).");
+      socket.emit("session:full", "A sala ja esta cheia (4 jogadores).");
       socket.disconnect(true);
       return;
     }
@@ -68,14 +69,15 @@ function registerSocketHandlers(io, sessionState) {
 
     socket.on("game:start", () => {
       const requester = getSlotByToken(sessionState, playerToken);
-      const hostOnline = Boolean(sessionState.host && sessionState.host.online);
-      const guestOnline = Boolean(sessionState.guest && sessionState.guest.online);
+      const assignedSlots = getAssignedSlots(sessionState);
+      const connectedSlots = assignedSlots.filter((slotItem) => slotItem.online);
+      const canStartByPlayers = connectedSlots.length >= 2;
 
       if (!requester || requester.role !== "host") {
         return;
       }
 
-      if (!hostOnline || !guestOnline) {
+      if (!canStartByPlayers) {
         return;
       }
 
@@ -99,6 +101,9 @@ function registerSocketHandlers(io, sessionState) {
         return;
       }
 
+      io.emit("card:drawn", {
+        role: requester.role,
+      });
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
     });

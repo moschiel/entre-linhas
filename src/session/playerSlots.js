@@ -1,57 +1,60 @@
+const PLAYER_SLOTS = [
+  { role: "host", defaultName: "Host" },
+  { role: "guest", defaultName: "Convidado" },
+  { role: "player3", defaultName: "Jogador 3" },
+  { role: "player4", defaultName: "Jogador 4" },
+];
+
+function getAllSlots(sessionState) {
+  return PLAYER_SLOTS.map((slot) => sessionState[slot.role]).filter(Boolean);
+}
+
+function getAssignedSlots(sessionState) {
+  return getAllSlots(sessionState);
+}
+
 function getSlotByToken(sessionState, playerToken) {
-  if (sessionState.host && sessionState.host.playerToken === playerToken) {
-    return sessionState.host;
-  }
-
-  if (sessionState.guest && sessionState.guest.playerToken === playerToken) {
-    return sessionState.guest;
-  }
-
-  return null;
+  return getAllSlots(sessionState).find((slot) => slot.playerToken === playerToken) || null;
 }
 
 function assignNewSlot(sessionState, playerToken, socketId) {
-  if (!sessionState.host) {
-    sessionState.host = {
-      role: "host",
-      playerToken,
-      socketId,
-      online: true,
-      name: "Host",
-    };
-    return sessionState.host;
-  }
+  for (let i = 0; i < PLAYER_SLOTS.length; i += 1) {
+    const slotDef = PLAYER_SLOTS[i];
+    if (sessionState[slotDef.role]) {
+      continue;
+    }
 
-  if (!sessionState.guest) {
-    sessionState.guest = {
-      role: "guest",
+    sessionState[slotDef.role] = {
+      role: slotDef.role,
       playerToken,
       socketId,
       online: true,
-      name: "Convidado",
+      name: slotDef.defaultName,
     };
-    return sessionState.guest;
+    return sessionState[slotDef.role];
   }
 
   return null;
 }
 
 function takeOfflineSlot(sessionState, playerToken, socketId) {
-  const candidates = [sessionState.guest, sessionState.host];
-  const reusable = candidates.find((slot) => slot && !slot.online);
-
+  const reusable = getAllSlots(sessionState).find((slot) => !slot.online);
   if (!reusable) {
     return null;
   }
 
+  const slotDef = PLAYER_SLOTS.find((slot) => slot.role === reusable.role);
   reusable.playerToken = playerToken;
   reusable.socketId = socketId;
   reusable.online = true;
-  reusable.name = reusable.role === "host" ? "Host" : "Convidado";
+  reusable.name = slotDef ? slotDef.defaultName : reusable.name;
   return reusable;
 }
 
 module.exports = {
+  PLAYER_SLOTS,
+  getAllSlots,
+  getAssignedSlots,
   getSlotByToken,
   assignNewSlot,
   takeOfflineSlot,

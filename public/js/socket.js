@@ -1,4 +1,52 @@
 (function initSocketModule(global) {
+  const DEFAULT_PLAYER_SLOTS = [
+    { role: "host", defaultName: "Host" },
+    { role: "guest", defaultName: "Convidado" },
+    { role: "player3", defaultName: "Jogador 3" },
+    { role: "player4", defaultName: "Jogador 4" },
+  ];
+
+  function normalizeState(rawState) {
+    const state = rawState || {};
+    const game = state.game || {};
+    let players = Array.isArray(state.players) ? state.players : null;
+
+    if (!players) {
+      const legacyByRole = {
+        host: state.host || null,
+        guest: state.guest || null,
+      };
+
+      players = DEFAULT_PLAYER_SLOTS.map((slotDef) => {
+        const legacy = legacyByRole[slotDef.role];
+        return {
+          role: slotDef.role,
+          defaultName: slotDef.defaultName,
+          name: legacy && legacy.name ? legacy.name : slotDef.defaultName,
+          online: Boolean(legacy && legacy.online),
+          occupied: Boolean(legacy),
+          hasCard: false,
+        };
+      });
+    }
+
+    const connectedCount = Number.isFinite(state.connectedCount)
+      ? state.connectedCount
+      : players.filter((player) => player.occupied && player.online).length;
+    const capacity = Number.isFinite(state.capacity) ? state.capacity : DEFAULT_PLAYER_SLOTS.length;
+
+    return {
+      ...state,
+      players,
+      connectedCount,
+      capacity,
+      game: {
+        ...game,
+        canStart: Boolean(game.canStart),
+      },
+    };
+  }
+
   function createSocket(playerToken) {
     return io({
       auth: {
@@ -36,22 +84,20 @@
     });
 
     socket.on("state:update", (state) => {
-      gameState.lastGameState = state.game || null;
-      const disconnectedRole = state.host && !state.host.online
-        ? state.host.role
-        : state.guest && !state.guest.online
-          ? state.guest.role
-          : null;
-      dom.hostState.textContent = render.formatSlot(state.host);
-      dom.guestState.textContent = render.formatSlot(state.guest);
-      render.renderGameStatus(dom, state.game, {
-        disconnectedRole,
+      const normalizedState = normalizeState(state);
+      gameState.lastPublicState = normalizedState;
+      gameState.lastGameState = normalizedState.game || null;
+      const disconnectedPlayer = (normalizedState.players || []).find((player) => player.occupied && !player.online) || null;
+      render.renderPlayers(dom, normalizedState);
+      render.renderGameStatus(dom, normalizedState.game, {
+        disconnectedRole: disconnectedPlayer ? disconnectedPlayer.role : null,
+        disconnectedName: disconnectedPlayer ? disconnectedPlayer.name : null,
         myRole: gameState.myRoleValue,
       });
-      render.renderActionButtons(dom, state, gameState);
-      render.renderBoard(dom, gameState, state.game);
-      render.renderDeck(dom, gameState, state.game);
-      render.renderRoomStatus(dom, state);
+      render.renderActionButtons(dom, normalizedState, gameState);
+      render.renderBoard(dom, gameState, normalizedState.game);
+      render.renderDeck(dom, gameState, normalizedState.game, normalizedState);
+      render.renderRoomStatus(dom, normalizedState);
     });
 
     socket.on("session:full", () => {
@@ -85,10 +131,23 @@
 
     socket.on("state:private", (state) => {
       gameState.myPrivateCard = state ? state.myCard : null;
-      render.renderDeck(dom, gameState, gameState.lastGameState);
+      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
       window.dispatchEvent(new CustomEvent("entrelinhas:private-card", {
         detail: {
           card: gameState.myPrivateCard,
+        },
+      }));
+    });
+
+    socket.on("card:drawn", (payload) => {
+      const role = payload && typeof payload.role === "string" ? payload.role : null;
+      if (!role) {
+        return;
+      }
+
+      window.dispatchEvent(new CustomEvent("entrelinhas:card-drawn", {
+        detail: {
+          role,
         },
       }));
     });

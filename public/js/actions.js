@@ -1,11 +1,30 @@
 (function initActionsModule(global) {
-  const DRAW_ANIM_MS = 1000;
-  const DRAW_ANIM_BUFFER_MS = 100;
+  const config = global.EntreLinhasConfig || {};
+  const uiConfig = config.ui || {};
+  const DRAW_ANIM_MS = Number(uiConfig.drawAnimationMs) || 1000;
+  const DRAW_ANIM_BUFFER_MS = Number(uiConfig.drawAnimationBufferMs) || 100;
+  const DRAW_ANIM_HANDOFF_MS = Number(uiConfig.drawAnimationHandoffMs) || 120;
 
   function bindUiActions(socket, deps) {
     const { dom, gameState, storage, render } = deps;
     let activeFlightCoordEl = null;
     document.documentElement.style.setProperty("--draw-anim-ms", `${DRAW_ANIM_MS}ms`);
+
+    function getCardVisualByRole(role) {
+      if (role === "host") {
+        return dom.currentCardHostVisual;
+      }
+      if (role === "guest") {
+        return dom.currentCardGuestVisual;
+      }
+      if (role === "player3") {
+        return dom.currentCardPlayer3Visual;
+      }
+      if (role === "player4") {
+        return dom.currentCardPlayer4Visual;
+      }
+      return dom.currentCardHostVisual;
+    }
 
     function canDrawFromPile() {
       const game = gameState.lastGameState;
@@ -24,7 +43,10 @@
       return Number(game.drawPileCount || 0) > 0;
     }
 
-    function animateDrawFlight(onDone) {
+    function animateDrawFlight(role, options) {
+      const drawOptions = options || {};
+      const revealForSelf = Boolean(drawOptions.revealForSelf);
+      const onDone = typeof drawOptions.onDone === "function" ? drawOptions.onDone : () => {};
       const snap = (value) => {
         const ratio = window.devicePixelRatio || 1;
         return Math.round(value * ratio) / ratio;
@@ -37,7 +59,7 @@
       }
 
       const source = topCard.getBoundingClientRect();
-      const target = dom.deckCurrentVisual.getBoundingClientRect();
+      const target = getCardVisualByRole(role).getBoundingClientRect();
       const ghost = document.createElement("div");
       ghost.className = "draw-flight-card";
       ghost.innerHTML = `
@@ -67,13 +89,15 @@
           if (ghost.parentNode) {
             ghost.parentNode.removeChild(ghost);
           }
-        }, 120);
+        }, DRAW_ANIM_HANDOFF_MS);
       };
       const handleEnd = () => cleanup();
 
       ghost.addEventListener("transitionend", handleEnd);
       window.requestAnimationFrame(() => {
-        ghost.classList.add("is-flipping");
+        if (revealForSelf) {
+          ghost.classList.add("is-flipping");
+        }
         ghost.style.left = `${snap(target.left)}px`;
         ghost.style.top = `${snap(target.top)}px`;
         ghost.style.width = `${snap(target.width)}px`;
@@ -95,6 +119,30 @@
       }
 
       activeFlightCoordEl.textContent = card.coord;
+    });
+
+    window.addEventListener("entrelinhas:card-drawn", (event) => {
+      const role = event && event.detail ? event.detail.role : null;
+      if (!role) {
+        return;
+      }
+
+      if (role === gameState.myRoleValue) {
+        gameState.drawFlightInProgress = true;
+        render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+        animateDrawFlight(role, {
+          revealForSelf: true,
+          onDone: () => {
+            gameState.drawFlightInProgress = false;
+            render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+          },
+        });
+        return;
+      }
+
+      animateDrawFlight(role, {
+        revealForSelf: false,
+      });
     });
 
     dom.saveNameBtn.addEventListener("click", () => {
@@ -119,13 +167,6 @@
       if (!canDrawFromPile()) {
         return;
       }
-
-      gameState.drawFlightInProgress = true;
-      render.renderDeck(dom, gameState, gameState.lastGameState);
-      animateDrawFlight(() => {
-        gameState.drawFlightInProgress = false;
-        render.renderDeck(dom, gameState, gameState.lastGameState);
-      });
       socket.emit("card:draw");
     });
 
@@ -146,7 +187,7 @@
       gameState.selectedBoardCoord = null;
       dom.selectedCoord.textContent = "nenhuma";
       render.renderBoard(dom, gameState, gameState.lastGameState);
-      render.renderDeck(dom, gameState, gameState.lastGameState);
+      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
     });
   }
 

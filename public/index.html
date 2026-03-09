@@ -36,6 +36,19 @@
       </section>
 
       <div id="gameLayout" class="game-layout">
+      <section id="tableLeftPlayersSection" class="card hidden">
+        <div class="table-current-stack">
+          <div class="deck-current-panel">
+            <p class="deck-visual-label" id="currentCardLabelHost">Host</p>
+            <div id="currentCardHostVisual" class="deck-current-visual">--</div>
+          </div>
+          <div class="deck-current-panel">
+            <p class="deck-visual-label" id="currentCardLabelGuest">Convidado</p>
+            <div id="currentCardGuestVisual" class="deck-current-visual">--</div>
+          </div>
+        </div>
+      </section>
+
       <section id="boardSection" class="card hidden">
         <!-- <h2>Matriz 5x5</h2> -->
         <!-- <p class="hint">Linhas: A-E com palavra da linha. Colunas: 1-5 com palavra da coluna.</p> -->
@@ -52,11 +65,15 @@
         </div>
       </section>
 
-      <section id="tableCurrentSection" class="card hidden">
-        <div class="table-current-wrap">
+      <section id="tableRightPlayersSection" class="card hidden">
+        <div class="table-current-stack">
           <div class="deck-current-panel">
-            <p class="deck-visual-label">Carta atual</p>
-            <div id="deckCurrentVisual" class="deck-current-visual">--</div>
+            <p class="deck-visual-label" id="currentCardLabelPlayer3">Jogador 3</p>
+            <div id="currentCardPlayer3Visual" class="deck-current-visual">--</div>
+          </div>
+          <div class="deck-current-panel">
+            <p class="deck-visual-label" id="currentCardLabelPlayer4">Jogador 4</p>
+            <div id="currentCardPlayer4Visual" class="deck-current-visual">--</div>
           </div>
         </div>
       </section>
@@ -104,17 +121,27 @@
         <p><strong>Descartadas:</strong> <span id="summaryDiscarded">0</span></p>
       </section>
 
-      <section class="card">
+      <section id="playersSection" class="card">
         <h2>Jogadores</h2>
 
         <div class="player-row">
           <span class="label">Host</span>
-          <span id="hostState">vazio</span>
+          <span id="playerStateHost">vazio</span>
         </div>
 
         <div class="player-row">
           <span class="label">Convidado</span>
-          <span id="guestState">vazio</span>
+          <span id="playerStateGuest">vazio</span>
+        </div>
+
+        <div class="player-row">
+          <span class="label">Jogador 3</span>
+          <span id="playerStatePlayer3">vazio</span>
+        </div>
+
+        <div class="player-row">
+          <span class="label">Jogador 4</span>
+          <span id="playerStatePlayer4">vazio</span>
         </div>
       </section>
 
@@ -129,13 +156,14 @@
 
       <section id="fullWarning" class="card warning hidden">
         <h2>Sala cheia</h2>
-        <p>Ja existem 2 jogadores nessa sessao. Feche este dispositivo.</p>
+        <p>Ja existem 4 jogadores nessa sessao. Feche este dispositivo.</p>
       </section>
     </main>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/state.js"></script>
     <script src="/js/storage.js"></script>
+    <script src="/js/config.js"></script>
     <script src="/js/dom.js"></script>
     <script src="/js/render.js"></script>
     <script src="/js/socket.js"></script>
