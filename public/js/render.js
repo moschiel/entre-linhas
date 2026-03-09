@@ -39,6 +39,8 @@
   }
 
   function renderActionButtons(dom, state, gameState) {
+    dom.startGameSection.classList.toggle("hidden", !gameState.isHost());
+
     if (!state || !state.game) {
       dom.startGameBtn.disabled = true;
       dom.endGameBtn.disabled = true;
