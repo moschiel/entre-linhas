@@ -1,6 +1,7 @@
 /* Layout: containers principais, cards e distribuicao dos blocos de UI. */
 .screen {
   max-width: 980px;
+  min-width: 900px;
   margin: 0 auto;
   padding: 20px 14px 28px;
 }
@@ -53,7 +54,10 @@
 }
 
 .game-layout {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
+  gap: 10px;
+  align-items: start;
 }
 
 #boardSection,
@@ -75,6 +79,18 @@
 
 #tableSideSection {
   padding: 10px;
+  margin-bottom: 0;
+}
+
+#boardSection {
+  grid-column: 1;
+  grid-row: 1;
+  margin-bottom: 0;
+}
+
+#tableSideSection {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 #boardSection::before {
@@ -94,34 +110,25 @@
   position: relative;
 }
 
-@media (max-width: 900px) {
-  .screen {
-    max-width: 640px;
-  }
+.rotate-device-notice {
+  display: none;
 }
 
-@media (orientation: landscape) and (max-width: 980px) {
+@media (orientation: portrait) and (hover: none) and (pointer: coarse) {
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .rotate-device-notice {
+    display: none !important;
+  }
+
   .screen {
-    max-width: 100%;
+    width: 980px;
+    max-width: none;
+    min-width: 980px;
     padding: 12px 10px 16px;
-  }
-
-  .game-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
-    gap: 10px;
-    align-items: start;
-  }
-
-  #boardSection {
-    grid-column: 1;
-    grid-row: 1;
-    margin-bottom: 0;
-  }
-
-  #tableSideSection {
-    grid-column: 2;
-    grid-row: 1;
-    margin-bottom: 0;
+    margin: 0;
   }
 }
