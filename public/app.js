@@ -26,6 +26,7 @@ const connectionStatus = document.getElementById("connectionStatus");
 const hostState = document.getElementById("hostState");
 const guestState = document.getElementById("guestState");
 const fullWarning = document.getElementById("fullWarning");
+const startGameSection = document.getElementById("startGameSection");
 const startGameBtn = document.getElementById("startGameBtn");
 const endGameBtn = document.getElementById("endGameBtn");
 const actionHint = document.getElementById("actionHint");
@@ -228,13 +229,13 @@ function renderBoard(game) {
   }
 }
 
-function syncButtonVisibility(button, visible) {
+function syncElementVisibility(element, visible) {
   if (visible)  {
-    button.classList.remove("hidden");
+    element.classList.remove("hidden");
   } else {
-    button.classList.add("hidden");
+    element.classList.add("hidden");
   }
-  button.disabled = !visible;
+  element.disabled = !visible;
 }
 
 const isHost = () => myRoleValue === "host";
@@ -249,10 +250,10 @@ function renderDeck(game) {
   if (!hasActiveRound) {
     drawPileCount.textContent = "0";
     myCardValue.textContent = "nenhuma";
-    syncButtonVisibility(drawCardBtn, false);
-    syncButtonVisibility(placeCardBtn, false);
-    syncButtonVisibility(discardCardBtn, false);
-    syncButtonVisibility(invalidateCardBtn, false);
+    syncElementVisibility(drawCardBtn, false);
+    syncElementVisibility(placeCardBtn, false);
+    syncElementVisibility(discardCardBtn, false);
+    syncElementVisibility(invalidateCardBtn, false);
     drawHint.textContent = "Saque manual: nao existe ordem de turno.";
     discardSection.classList.add("hidden");
     discardList.innerHTML = "";
@@ -269,10 +270,10 @@ function renderDeck(game) {
   const hasCard = Boolean(myPrivateCard);
   const canDraw = (game.drawPileCount || 0) > 0 && !hasCard;
 
-  syncButtonVisibility(drawCardBtn, canDraw);
-  syncButtonVisibility(placeCardBtn, hasCard);
-  syncButtonVisibility(discardCardBtn, hasCard);
-  syncButtonVisibility(invalidateCardBtn, isHost() && selectedBoardCoord);
+  syncElementVisibility(drawCardBtn, canDraw);
+  syncElementVisibility(placeCardBtn, hasCard);
+  syncElementVisibility(discardCardBtn, hasCard);
+  syncElementVisibility(invalidateCardBtn, isHost() && selectedBoardCoord);
 
   const discardedCount = game.discardPileCount || 0;
   const isEnded = ended;
