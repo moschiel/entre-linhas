@@ -1,0 +1,80 @@
+/* Board: estilos da matriz 5x5, cabecalhos e estados das coordenadas. */
+.matrix-wrap {
+  overflow-x: auto;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 460px;
+}
+
+.matrix-table th,
+.matrix-table td {
+  border: 1px solid var(--line);
+  text-align: center;
+  padding: 6px;
+  vertical-align: middle;
+}
+
+.matrix-table thead th {
+  background: #efe4cf;
+}
+
+.corner-cell {
+  width: 82px;
+  color: var(--muted);
+}
+
+.col-key {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.col-word {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  line-height: 1.1;
+}
+
+.row-header {
+  width: 82px;
+  background: #efe4cf;
+}
+
+.row-key {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.row-word {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  line-height: 1.1;
+}
+
+.coord-cell {
+  height: 42px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.coord-cell.filled {
+  background: #d9f4e8;
+  color: #07543e;
+  font-weight: 700;
+}
+
+.coord-cell.selected {
+  outline: 2px solid #b42318;
+  outline-offset: -2px;
+}
+
+.coord-mini {
+  font-size: 0.62rem;
+  line-height: 1.1;
+  margin-top: 3px;
+  color: #26644f;
+}

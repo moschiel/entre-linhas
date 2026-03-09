@@ -1,0 +1,47 @@
+/* Game: componentes do estado de partida, descarte, resumo e avisos. */
+#myCardValue {
+  display: inline-block;
+  min-width: 52px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px 8px;
+  background: #f8f2e8;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+#selectedCoord {
+  font-weight: 700;
+}
+
+.discard-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.discard-list li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+#summaryRating {
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+#connectionStatus {
+  font-weight: 700;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
+.warning {
+  background: var(--warn-bg);
+  border-color: #ffc9a4;
+  color: var(--warn-ink);
+}

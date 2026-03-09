@@ -1,0 +1,69 @@
+/* Base: tokens de tema, reset global e elementos HTML compartilhados. */
+:root {
+  --bg: #f4efe6;
+  --bg-accent: #e8ddca;
+  --ink: #1f2933;
+  --muted: #52606d;
+  --panel: #fffdf8;
+  --line: #d9cdb8;
+  --cta: #007a57;
+  --cta-ink: #ffffff;
+  --warn-bg: #ffe8d9;
+  --warn-ink: #7c2d12;
+  --danger: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, var(--bg-accent), var(--bg));
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+h1 {
+  margin: 4px 0;
+  font-size: 1.8rem;
+}
+
+.subtitle {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cta-ink);
+  background: var(--cta);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.danger {
+  background: var(--danger);
+}
+
+.danger-soft {
+  background: #8a3b12;
+}
