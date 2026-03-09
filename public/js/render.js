@@ -218,8 +218,9 @@
 
     const hasCard = Boolean(gameState.myPrivateCard);
     const canDraw = pileCount > 0 && !hasCard;
+    dom.deckPileVisual.classList.toggle("can-draw", canDraw);
 
-    syncElementVisibility(dom.drawCardBtn, canDraw);
+    syncElementVisibility(dom.drawCardBtn, false);
     syncElementVisibility(dom.placeCardBtn, hasCard);
     syncElementVisibility(dom.discardCardBtn, hasCard);
     syncElementVisibility(dom.invalidateCardBtn, gameState.isHost() && Boolean(gameState.selectedBoardCoord));
