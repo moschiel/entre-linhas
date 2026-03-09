@@ -17,9 +17,9 @@
     element.disabled = !visible;
   }
 
-  function renderDeckPileVisual(dom, pileCount) {
-    dom.deckPileVisual.innerHTML = "";
-    dom.deckPileVisual.classList.toggle("empty", pileCount === 0);
+  function renderDeckPileVisual(container, pileCount) {
+    container.innerHTML = "";
+    container.classList.toggle("empty", pileCount === 0);
 
     for (let i = pileCount - 1; i >= 0; i -= 1) {
       const card = document.createElement("div");
@@ -27,7 +27,7 @@
       card.style.top = `${i}px`;
       card.style.left = `${i}px`;
       card.style.zIndex = String(pileCount - i);
-      dom.deckPileVisual.appendChild(card);
+      container.appendChild(card);
     }
   }
 
@@ -184,13 +184,15 @@
     const hasActiveRound = inGame || ended;
 
     dom.deckSection.classList.toggle("hidden", !inGame);
+    dom.tableSideSection.classList.toggle("hidden", !hasActiveRound);
 
     if (!hasActiveRound) {
       dom.drawPileCount.textContent = "0";
       dom.myCardValue.textContent = "nenhuma";
       dom.deckCurrentVisual.textContent = "--";
       dom.deckCurrentVisual.classList.remove("filled");
-      renderDeckPileVisual(dom, 0);
+      renderDeckPileVisual(dom.deckPileVisual, 0);
+      renderDeckPileVisual(dom.discardPileVisual, 0);
       syncElementVisibility(dom.drawCardBtn, false);
       syncElementVisibility(dom.placeCardBtn, false);
       syncElementVisibility(dom.discardCardBtn, false);
@@ -208,7 +210,9 @@
     dom.drawPileCount.textContent = String(game.drawPileCount || 0);
     dom.myCardValue.textContent = gameState.myPrivateCard ? gameState.myPrivateCard.coord : "nenhuma";
     const pileCount = Number(game.drawPileCount || 0);
-    renderDeckPileVisual(dom, pileCount);
+    const discardedCount = Number(game.discardPileCount || 0);
+    renderDeckPileVisual(dom.deckPileVisual, pileCount);
+    renderDeckPileVisual(dom.discardPileVisual, discardedCount);
     dom.deckCurrentVisual.textContent = gameState.myPrivateCard ? gameState.myPrivateCard.coord : "--";
     dom.deckCurrentVisual.classList.toggle("filled", Boolean(gameState.myPrivateCard));
 
@@ -220,11 +224,11 @@
     syncElementVisibility(dom.discardCardBtn, hasCard);
     syncElementVisibility(dom.invalidateCardBtn, gameState.isHost() && Boolean(gameState.selectedBoardCoord));
 
-    const discardedCount = game.discardPileCount || 0;
+    const discardedCountForList = game.discardPileCount || 0;
     const isEnded = ended;
     const discardActivity = game.discardActivity || [];
     dom.discardSection.classList.remove("hidden");
-    if (!isEnded && discardedCount === 0) {
+    if (!isEnded && discardedCountForList === 0) {
       dom.discardList.innerHTML = "<li>Nenhuma carta descartada ainda.</li>";
     } else if (!isEnded) {
       dom.discardList.innerHTML = discardActivity

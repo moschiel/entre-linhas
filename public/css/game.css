@@ -1,9 +1,8 @@
 /* Game: componentes do estado de partida, descarte, resumo e avisos. */
-.deck-visual-wrap {
+.table-side-stack {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 8px 0 12px;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .deck-visual-label {

@@ -44,20 +44,30 @@
         </div>
       </section>
 
-      <section id="deckSection" class="card hidden">
-        <h2>Cartas</h2>
-        <p><strong>Pilha restante:</strong> <span id="drawPileCount">0</span></p>
-        <p><strong>Sua carta atual:</strong> <span id="myCardValue">nenhuma</span></p>
-        <div class="deck-visual-wrap">
+      <section id="tableSideSection" class="card hidden">
+        <div class="table-side-stack">
           <div class="deck-pile-panel">
             <p class="deck-visual-label">Pilha</p>
             <div id="deckPileVisual" class="deck-pile-visual"></div>
           </div>
+
           <div class="deck-current-panel">
             <p class="deck-visual-label">Carta atual</p>
             <div id="deckCurrentVisual" class="deck-current-visual">--</div>
           </div>
+
+          <div class="deck-pile-panel">
+            <p class="deck-visual-label">Descarte</p>
+            <div id="discardPileVisual" class="deck-pile-visual empty"></div>
+          </div>
         </div>
+      </section>
+      </div>
+
+      <section id="deckSection" class="card hidden">
+        <h2>Cartas</h2>
+        <p><strong>Pilha restante:</strong> <span id="drawPileCount">0</span></p>
+        <p><strong>Sua carta atual:</strong> <span id="myCardValue">nenhuma</span></p>
         <p hidden><strong>Selecionada no tabuleiro:</strong> <span id="selectedCoord">nenhuma</span></p>
         <div class="actions-row">
           <button id="drawCardBtn" disabled>Sacar carta</button>
@@ -82,7 +92,6 @@
         <p><strong>Acertos no tabuleiro:</strong> <span id="summaryCorrect">0</span>/25</p>
         <p><strong>Descartadas:</strong> <span id="summaryDiscarded">0</span></p>
       </section>
-      </div>
 
       <section class="card">
         <h2>Jogadores</h2>
