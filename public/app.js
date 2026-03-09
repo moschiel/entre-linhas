@@ -126,14 +126,13 @@ function renderActionButtons(state) {
     return;
   }
 
-  const isHost = myRoleValue === "host";
   const inGame = state.game.phase === "in_game";
   const ended = state.game.phase === "ended";
 
-  startGameBtn.disabled = !isHost || !state.game.canStart;
-  endGameBtn.disabled = !isHost || (!inGame && !ended);
+  startGameBtn.disabled = !isHost() || !state.game.canStart;
+  endGameBtn.disabled = !isHost() || (!inGame && !ended);
 
-  if (!isHost) {
+  if (!isHost()) {
     actionHint.textContent = "Apenas o host pode iniciar/encerrar a partida.";
     return;
   }
@@ -212,19 +211,21 @@ function renderBoard(game) {
 
   matrixBody.innerHTML = bodyRows;
 
-  matrixBody.querySelectorAll(".coord-cell.filled").forEach((cell) => {
-    cell.addEventListener("click", () => {
-      if(cell.dataset.coord === selectedBoardCoord) {
-        selectedBoardCoord = null; // se clicar na mesma coordenada, desmarca
-      } else {
-        selectedBoardCoord = cell.dataset.coord || null;
-      }
-      console.log("Selected board coord:", cell.dataset.coord);
-      selectedCoord.textContent = selectedBoardCoord || "nenhuma";
-      renderBoard(game);
-      renderDeck(lastGameState);
+  if(isHost()) { // apenas o host pode invalidar cartas, entao so pode clicar nas cartas do tabuleiro para invalidar elas. 
+    matrixBody.querySelectorAll(".coord-cell.filled").forEach((cell) => {
+      cell.addEventListener("click", () => {
+        if(cell.dataset.coord === selectedBoardCoord) {
+          selectedBoardCoord = null; // se clicar na mesma coordenada, desmarca
+        } else {
+          selectedBoardCoord = cell.dataset.coord || null;
+        }
+        console.log("Selected board coord:", cell.dataset.coord);
+        selectedCoord.textContent = selectedBoardCoord || "nenhuma";
+        renderBoard(game);
+        renderDeck(lastGameState);
+      });
     });
-  });
+  }
 }
 
 function syncButtonVisibility(button, visible) {
@@ -235,6 +236,8 @@ function syncButtonVisibility(button, visible) {
   }
   button.disabled = !visible;
 }
+
+const isHost = () => myRoleValue === "host";
 
 function renderDeck(game) {
   const inGame = Boolean(game && game.phase === "in_game");
@@ -265,12 +268,11 @@ function renderDeck(game) {
 
   const hasCard = Boolean(myPrivateCard);
   const canDraw = (game.drawPileCount || 0) > 0 && !hasCard;
-  const isHost = myRoleValue === "host";
 
   syncButtonVisibility(drawCardBtn, canDraw);
   syncButtonVisibility(placeCardBtn, hasCard);
   syncButtonVisibility(discardCardBtn, hasCard);
-  syncButtonVisibility(invalidateCardBtn, isHost && selectedBoardCoord);
+  syncButtonVisibility(invalidateCardBtn, isHost() && selectedBoardCoord);
 
   const discardedCount = game.discardPileCount || 0;
   const isEnded = ended;
