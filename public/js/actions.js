@@ -1,6 +1,6 @@
 (function initActionsModule(global) {
   function bindUiActions(socket, deps) {
-    const { dom, gameState, storage, render, isHost } = deps;
+    const { dom, gameState, storage, render } = deps;
 
     dom.saveNameBtn.addEventListener("click", () => {
       const name = dom.nameInput.value.trim();
@@ -40,8 +40,8 @@
       socket.emit("card:invalidate", gameState.selectedBoardCoord);
       gameState.selectedBoardCoord = null;
       dom.selectedCoord.textContent = "nenhuma";
-      render.renderBoard(dom, gameState, gameState.lastGameState, isHost);
-      render.renderDeck(dom, gameState, gameState.lastGameState, isHost);
+      render.renderBoard(dom, gameState, gameState.lastGameState);
+      render.renderDeck(dom, gameState, gameState.lastGameState);
     });
   }
 

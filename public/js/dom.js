@@ -10,6 +10,7 @@
       hostState: document.getElementById("hostState"),
       guestState: document.getElementById("guestState"),
       fullWarning: document.getElementById("fullWarning"),
+      startGameSection: document.getElementById("startGameSection"),
       startGameBtn: document.getElementById("startGameBtn"),
       endGameBtn: document.getElementById("endGameBtn"),
       actionHint: document.getElementById("actionHint"),

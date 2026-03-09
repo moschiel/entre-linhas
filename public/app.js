@@ -1,6 +1,6 @@
 (function bootstrapApp(global) {
   const dom = global.EntreLinhasDom.getDom();
-  const { state, isHost } = global.EntreLinhasState;
+  const { state } = global.EntreLinhasState;
   const storage = global.EntreLinhasStorage;
   const render = global.EntreLinhasRender;
 
@@ -15,7 +15,6 @@
   global.EntreLinhasSocket.bindSocketEvents(socket, {
     dom,
     gameState: state,
-    isHost,
     storage,
     render,
   });
@@ -25,6 +24,5 @@
     gameState: state,
     storage,
     render,
-    isHost,
   });
 })(window);

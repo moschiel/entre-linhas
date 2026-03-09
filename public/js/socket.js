@@ -12,7 +12,7 @@
   }
 
   function bindSocketEvents(socket, deps) {
-    const { dom, gameState, isHost, storage, render } = deps;
+    const { dom, gameState, storage, render } = deps;
 
     dom.connectionStatus.textContent = "Conectando...";
 
@@ -40,9 +40,9 @@
       dom.hostState.textContent = render.formatSlot(state.host);
       dom.guestState.textContent = render.formatSlot(state.guest);
       render.renderGameStatus(dom, state.game);
-      render.renderActionButtons(dom, state, isHost);
-      render.renderBoard(dom, gameState, state.game, isHost);
-      render.renderDeck(dom, gameState, state.game, isHost);
+      render.renderActionButtons(dom, state, gameState);
+      render.renderBoard(dom, gameState, state.game);
+      render.renderDeck(dom, gameState, state.game);
       render.renderRoomStatus(dom, state.connectedCount, state.capacity);
     });
 
@@ -77,7 +77,7 @@
 
     socket.on("state:private", (state) => {
       gameState.myPrivateCard = state ? state.myCard : null;
-      render.renderDeck(dom, gameState, gameState.lastGameState, isHost);
+      render.renderDeck(dom, gameState, gameState.lastGameState);
     });
   }
 

@@ -4,14 +4,12 @@
     myPrivateCard: null,
     lastGameState: null,
     selectedBoardCoord: null,
+    isHost() {
+      return this.myRoleValue === "host";
+    },
   };
-
-  function isHost() {
-    return state.myRoleValue === "host";
-  }
 
   global.EntreLinhasState = {
     state,
-    isHost,
   };
 })(window);

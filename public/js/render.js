@@ -38,7 +38,7 @@
     dom.gameStatus.textContent = "Lobby";
   }
 
-  function renderActionButtons(dom, state, isHost) {
+  function renderActionButtons(dom, state, gameState) {
     if (!state || !state.game) {
       dom.startGameBtn.disabled = true;
       dom.endGameBtn.disabled = true;
@@ -48,10 +48,10 @@
     const inGame = state.game.phase === "in_game";
     const ended = state.game.phase === "ended";
 
-    dom.startGameBtn.disabled = !isHost() || !state.game.canStart;
-    dom.endGameBtn.disabled = !isHost() || (!inGame && !ended);
+    dom.startGameBtn.disabled = !gameState.isHost() || !state.game.canStart;
+    dom.endGameBtn.disabled = !gameState.isHost() || (!inGame && !ended);
 
-    if (!isHost()) {
+    if (!gameState.isHost()) {
       dom.actionHint.textContent = "Apenas o host pode iniciar/encerrar a partida.";
       return;
     }
@@ -74,7 +74,7 @@
     dom.actionHint.textContent = "Pronto para iniciar quando os 2 estiverem online.";
   }
 
-  function renderBoard(dom, gameState, game, isHost) {
+  function renderBoard(dom, gameState, game) {
     const shouldShow = Boolean(game && (game.phase === "in_game" || game.phase === "ended") && game.matrix);
     dom.boardSection.classList.toggle("hidden", !shouldShow);
 
@@ -130,7 +130,7 @@
 
     dom.matrixBody.innerHTML = bodyRows;
 
-    if (isHost()) {
+    if (gameState.isHost()) {
       dom.matrixBody.querySelectorAll(".coord-cell.filled").forEach((cell) => {
         cell.addEventListener("click", () => {
           if (cell.dataset.coord === gameState.selectedBoardCoord) {
@@ -140,14 +140,14 @@
           }
 
           dom.selectedCoord.textContent = gameState.selectedBoardCoord || "nenhuma";
-          renderBoard(dom, gameState, game, isHost);
-          renderDeck(dom, gameState, gameState.lastGameState, isHost);
+          renderBoard(dom, gameState, game);
+          renderDeck(dom, gameState, gameState.lastGameState);
         });
       });
     }
   }
 
-  function renderDeck(dom, gameState, game, isHost) {
+  function renderDeck(dom, gameState, game) {
     const inGame = Boolean(game && game.phase === "in_game");
     const ended = Boolean(game && game.phase === "ended");
     const hasActiveRound = inGame || ended;
@@ -180,7 +180,7 @@
     syncElementVisibility(dom.drawCardBtn, canDraw);
     syncElementVisibility(dom.placeCardBtn, hasCard);
     syncElementVisibility(dom.discardCardBtn, hasCard);
-    syncElementVisibility(dom.invalidateCardBtn, isHost() && Boolean(gameState.selectedBoardCoord));
+    syncElementVisibility(dom.invalidateCardBtn, gameState.isHost() && Boolean(gameState.selectedBoardCoord));
 
     const discardedCount = game.discardPileCount || 0;
     const isEnded = ended;
