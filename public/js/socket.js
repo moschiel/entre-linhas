@@ -43,7 +43,7 @@
       render.renderActionButtons(dom, state, gameState);
       render.renderBoard(dom, gameState, state.game);
       render.renderDeck(dom, gameState, state.game);
-      render.renderRoomStatus(dom, state.connectedCount, state.capacity);
+      render.renderRoomStatus(dom, state);
     });
 
     socket.on("session:full", () => {

@@ -42,6 +42,8 @@
     dom.startGameSection.classList.toggle("hidden", !gameState.isHost());
 
     if (!state || !state.game) {
+      dom.startGameBtn.classList.remove("hidden");
+      dom.endGameBtn.classList.add("hidden");
       dom.startGameBtn.disabled = true;
       dom.endGameBtn.disabled = true;
       return;
@@ -49,6 +51,10 @@
 
     const inGame = state.game.phase === "in_game";
     const ended = state.game.phase === "ended";
+    const hasStarted = inGame || ended;
+
+    dom.startGameBtn.classList.toggle("hidden", hasStarted);
+    dom.endGameBtn.classList.toggle("hidden", !hasStarted);
 
     dom.startGameBtn.disabled = !gameState.isHost() || !state.game.canStart;
     dom.endGameBtn.disabled = !gameState.isHost() || (!inGame && !ended);
@@ -236,7 +242,18 @@
     dom.drawHint.textContent = "Saque quando quiser. Os dois jogadores podem sacar em paralelo.";
   }
 
-  function renderRoomStatus(dom, connectedCount, capacity) {
+  function renderRoomStatus(dom, state) {
+    const connectedCount = state.connectedCount;
+    const capacity = state.capacity;
+    const canStart = Boolean(state.game && state.game.canStart);
+    const inLobby = Boolean(state.game && state.game.phase === "lobby");
+
+    if (connectedCount === capacity && canStart && inLobby) {
+      dom.roomStatus.textContent = "Aguardando Host iniciar o Jogo";
+      dom.roomStatus.style.color = "green";
+      return;
+    }
+
     if (connectedCount === capacity) {
       dom.roomStatus.textContent = "Sala completa";
       dom.roomStatus.style.color = "green";
