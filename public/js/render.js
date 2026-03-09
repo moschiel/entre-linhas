@@ -17,14 +17,23 @@
     element.disabled = !visible;
   }
 
-  function renderGameStatus(dom, game) {
+  function renderGameStatus(dom, game, statusContext) {
     if (!game) {
       dom.gameStatus.textContent = "Lobby";
       return;
     }
 
     if (game.phase === "in_game") {
-      dom.gameStatus.textContent = game.pausedByDisconnect ? "Em jogo (pausado por desconexao)" : "Em jogo";
+      const disconnectedRole = statusContext && statusContext.disconnectedRole;
+      const myRole = statusContext && statusContext.myRole;
+
+      if (game.pausedByDisconnect && disconnectedRole && myRole && disconnectedRole === myRole) {
+        dom.gameStatus.textContent = "Em jogo: aguardando reconexao";
+      } else if (game.pausedByDisconnect && disconnectedRole) {
+        dom.gameStatus.textContent = "Em jogo: aguardando o outro jogador se reconectar";
+      } else {
+        dom.gameStatus.textContent = game.pausedByDisconnect ? "Em jogo (pausado por desconexao)" : "Em jogo";
+      }
       dom.gameStatus.style.color = game.pausedByDisconnect ? "red" : "green";
       return;
     }

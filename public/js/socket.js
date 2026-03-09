@@ -37,9 +37,17 @@
 
     socket.on("state:update", (state) => {
       gameState.lastGameState = state.game || null;
+      const disconnectedRole = state.host && !state.host.online
+        ? state.host.role
+        : state.guest && !state.guest.online
+          ? state.guest.role
+          : null;
       dom.hostState.textContent = render.formatSlot(state.host);
       dom.guestState.textContent = render.formatSlot(state.guest);
-      render.renderGameStatus(dom, state.game);
+      render.renderGameStatus(dom, state.game, {
+        disconnectedRole,
+        myRole: gameState.myRoleValue,
+      });
       render.renderActionButtons(dom, state, gameState);
       render.renderBoard(dom, gameState, state.game);
       render.renderDeck(dom, gameState, state.game);
