@@ -11,6 +11,11 @@
   --warn-bg: #ffe8d9;
   --warn-ink: #7c2d12;
   --danger: #b42318;
+  --play-surface: #e8f2ea;
+  --play-surface-strong: #d8eadc;
+  --play-line: #b7d0be;
+  --play-shadow: rgba(25, 59, 45, 0.14);
+  --board-cell-size: 52px;
 }
 
 * {
@@ -20,7 +25,10 @@
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: radial-gradient(circle at top, var(--bg-accent), var(--bg));
+  background:
+    radial-gradient(circle at 15% 12%, #f8f1e4 0%, transparent 28%),
+    radial-gradient(circle at 84% 24%, #eef7ef 0%, transparent 30%),
+    linear-gradient(180deg, var(--bg-accent) 0%, var(--bg) 62%, #efe8dc 100%);
   color: var(--ink);
   min-height: 100vh;
 }

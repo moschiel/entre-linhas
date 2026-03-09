@@ -1,28 +1,33 @@
 /* Board: estilos da matriz 5x5, cabecalhos e estados das coordenadas. */
 .matrix-wrap {
   overflow-x: auto;
+  border: 1px solid var(--play-line);
+  border-radius: 12px;
+  padding: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(243, 250, 245, 0.65));
 }
 
 .matrix-table {
   width: 100%;
-  border-collapse: collapse;
-  /* min-width: 460px; */
+  border-collapse: separate;
+  border-spacing: 4px;
 }
 
 .matrix-table th,
 .matrix-table td {
-  border: 1px solid var(--line);
+  border: none;
+  border-radius: 8px;
   text-align: center;
-  /* padding: 6px; */
+  padding: 6px;
   vertical-align: middle;
 }
 
 .matrix-table thead th {
-  background: #efe4cf;
+  background: #d8eadc;
 }
 
 .corner-cell {
-  /* width: 82px; */
+  width: calc(var(--board-cell-size) + 32px);
   color: var(--muted);
 }
 
@@ -38,8 +43,8 @@
 }
 
 .row-header {
-  /* width: 82px; */
-  background: #efe4cf;
+  width: calc(var(--board-cell-size) + 32px);
+  background: #d8eadc;
 }
 
 .row-key {
@@ -56,15 +61,19 @@
 }
 
 .coord-cell {
-  height: 42px;
+  width: var(--board-cell-size);
+  height: var(--board-cell-size);
   font-size: 0.75rem;
   color: var(--muted);
+  background: #fffdf8;
+  border: 1px solid #dae6dc;
 }
 
 .coord-cell.filled {
-  background: #d9f4e8;
+  background: #cfeedd;
   color: #07543e;
   font-weight: 700;
+  border-color: #91c8aa;
 }
 
 .coord-cell.selected {

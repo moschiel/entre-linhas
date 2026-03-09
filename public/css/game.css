@@ -14,16 +14,16 @@
 
 .deck-pile-panel,
 .deck-current-panel {
-  background: #f8f3ea;
-  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #f6fbf7 0%, #edf6ef 100%);
+  border: 1px solid var(--play-line);
   border-radius: 10px;
   padding: 8px;
 }
 
 .deck-pile-visual {
   position: relative;
-  width: 112px;
-  height: 112px;
+  width: calc(var(--board-cell-size) + 24px);
+  height: calc(var(--board-cell-size) + 24px);
   margin: 0 auto;
 }
 
@@ -34,42 +34,45 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed #c8bca8;
+  border: 1px dashed #b9d0bf;
   border-radius: 8px;
-  color: #8d7e67;
+  color: #6f8a75;
   font-size: 0.75rem;
-  background: #fffdf8;
+  background: #f9fcfa;
 }
 
 .deck-pile-card {
   position: absolute;
-  width: 92px;
-  height: 92px;
+  width: var(--board-cell-size);
+  height: var(--board-cell-size);
   border-radius: 7px;
-  border: 1px solid #7f5d3f;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  border: 1px solid #6e8f78;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
   background:
-    radial-gradient(circle at center, #2e1d14 0 12px, transparent 13px),
-    linear-gradient(145deg, #7b3f22 0%, #9f5b34 45%, #b87449 100%);
+    radial-gradient(circle at center, #2d4d3a 0 12px, transparent 13px),
+    linear-gradient(145deg, #8fc3a7 0%, #74ae91 45%, #659f83 100%);
 }
 
 .deck-current-visual {
-  min-height: 120px;
-  border: 1px dashed #c8bca8;
+  width: var(--board-cell-size);
+  height: var(--board-cell-size);
+  margin: 0 auto;
+  border: 1px dashed #b9d0bf;
   border-radius: 8px;
-  background: #fffdf8;
+  background: #f9fcfa;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   font-weight: 700;
   letter-spacing: 0.8px;
-  color: #7e6d56;
+  color: #5a7c66;
 }
 
 .deck-current-visual.filled {
   border-style: solid;
-  border-color: #7fb696;
-  background: #e9f7ef;
+  border-color: #5fa07e;
+  background: #def2e5;
   color: #1f5c40;
 }
 
@@ -120,8 +123,7 @@
   color: var(--warn-ink);
 }
 
-@media (max-width: 520px) {
-  .deck-visual-wrap {
-    grid-template-columns: 1fr;
-  }
+#discardSection,
+#summarySection {
+  background: linear-gradient(180deg, #f4faf5 0%, #ebf5ed 100%);
 }
