@@ -4,6 +4,7 @@
     myPrivateCard: null,
     lastGameState: null,
     selectedBoardCoord: null,
+    drawFlightInProgress: false,
     isHost() {
       return this.myRoleValue === "host";
     },

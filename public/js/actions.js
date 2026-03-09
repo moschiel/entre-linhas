@@ -4,7 +4,6 @@
 
   function bindUiActions(socket, deps) {
     const { dom, gameState, storage, render } = deps;
-    let drawInFlight = false;
     let activeFlightCoordEl = null;
     document.documentElement.style.setProperty("--draw-anim-ms", `${DRAW_ANIM_MS}ms`);
 
@@ -14,7 +13,7 @@
         return false;
       }
 
-      if (drawInFlight) {
+      if (gameState.drawFlightInProgress) {
         return false;
       }
 
@@ -51,6 +50,8 @@
 
       const deltaX = target.left - source.left;
       const deltaY = target.top - source.top;
+      const scaleX = source.width > 0 ? target.width / source.width : 1;
+      const scaleY = source.height > 0 ? target.height / source.height : 1;
       let isDone = false;
       const cleanup = () => {
         if (isDone) {
@@ -69,7 +70,7 @@
       ghost.addEventListener("transitionend", handleEnd);
       window.requestAnimationFrame(() => {
         ghost.classList.add("is-flipping");
-        ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.94)`;
+        ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`;
         ghost.style.opacity = "0.96";
       });
 
@@ -77,7 +78,7 @@
     }
 
     window.addEventListener("entrelinhas:private-card", (event) => {
-      if (!drawInFlight || !activeFlightCoordEl) {
+      if (!gameState.drawFlightInProgress || !activeFlightCoordEl) {
         return;
       }
 
@@ -112,9 +113,11 @@
         return;
       }
 
-      drawInFlight = true;
+      gameState.drawFlightInProgress = true;
+      render.renderDeck(dom, gameState, gameState.lastGameState);
       animateDrawFlight(() => {
-        drawInFlight = false;
+        gameState.drawFlightInProgress = false;
+        render.renderDeck(dom, gameState, gameState.lastGameState);
       });
       socket.emit("card:draw");
     });

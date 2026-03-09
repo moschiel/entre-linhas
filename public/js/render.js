@@ -208,15 +208,16 @@
     }
 
     dom.deckPileCountLabel.textContent = String(game.drawPileCount || 0);
-    dom.myCardValue.textContent = gameState.myPrivateCard ? gameState.myPrivateCard.coord : "nenhuma";
+    const hasPrivateCard = Boolean(gameState.myPrivateCard);
+    const hasCard = hasPrivateCard && !gameState.drawFlightInProgress;
+    dom.myCardValue.textContent = hasCard ? gameState.myPrivateCard.coord : "nenhuma";
     const pileCount = Number(game.drawPileCount || 0);
     const discardedCount = Number(game.discardPileCount || 0);
     renderDeckPileVisual(dom.deckPileVisual, pileCount);
     renderDeckPileVisual(dom.discardPileVisual, discardedCount);
-    dom.deckCurrentVisual.textContent = gameState.myPrivateCard ? gameState.myPrivateCard.coord : "--";
-    dom.deckCurrentVisual.classList.toggle("filled", Boolean(gameState.myPrivateCard));
+    dom.deckCurrentVisual.textContent = hasCard ? gameState.myPrivateCard.coord : "--";
+    dom.deckCurrentVisual.classList.toggle("filled", hasCard);
 
-    const hasCard = Boolean(gameState.myPrivateCard);
     const canDraw = pileCount > 0 && !hasCard;
     dom.deckPileVisual.classList.toggle("can-draw", canDraw);
 
