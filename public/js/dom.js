@@ -19,7 +19,7 @@
       matrixHeadRow: document.getElementById("matrixHeadRow"),
       matrixBody: document.getElementById("matrixBody"),
       deckSection: document.getElementById("deckSection"),
-      drawPileCount: document.getElementById("drawPileCount"),
+      deckPileCountLabel: document.getElementById("deckPileCountLabel"),
       myCardValue: document.getElementById("myCardValue"),
       deckPileVisual: document.getElementById("deckPileVisual"),
       deckCurrentVisual: document.getElementById("deckCurrentVisual"),

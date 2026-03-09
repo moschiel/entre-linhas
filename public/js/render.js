@@ -187,7 +187,7 @@
     dom.tableSideSection.classList.toggle("hidden", !hasActiveRound);
 
     if (!hasActiveRound) {
-      dom.drawPileCount.textContent = "0";
+      dom.deckPileCountLabel.textContent = "0";
       dom.myCardValue.textContent = "nenhuma";
       dom.deckCurrentVisual.textContent = "--";
       dom.deckCurrentVisual.classList.remove("filled");
@@ -207,7 +207,7 @@
       return;
     }
 
-    dom.drawPileCount.textContent = String(game.drawPileCount || 0);
+    dom.deckPileCountLabel.textContent = String(game.drawPileCount || 0);
     dom.myCardValue.textContent = gameState.myPrivateCard ? gameState.myPrivateCard.coord : "nenhuma";
     const pileCount = Number(game.drawPileCount || 0);
     const discardedCount = Number(game.discardPileCount || 0);
