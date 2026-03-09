@@ -55,12 +55,14 @@
 
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
+  grid-template-columns: minmax(0, 1fr) 230px;
+  grid-template-rows: auto auto;
   gap: 10px;
   align-items: start;
 }
 
 #boardSection,
+#tableCurrentSection,
 #tableSideSection,
 #deckSection,
 #discardSection,
@@ -88,9 +90,17 @@
   margin-bottom: 0;
 }
 
-#tableSideSection {
+#tableCurrentSection {
   grid-column: 2;
   grid-row: 1;
+  margin-bottom: 0;
+  padding: 10px;
+}
+
+#tableSideSection {
+  grid-column: 1;
+  grid-row: 2;
+  margin-bottom: 0;
 }
 
 #boardSection::before {

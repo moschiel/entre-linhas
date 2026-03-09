@@ -15,6 +15,7 @@
       endGameBtn: document.getElementById("endGameBtn"),
       actionHint: document.getElementById("actionHint"),
       boardSection: document.getElementById("boardSection"),
+      tableCurrentSection: document.getElementById("tableCurrentSection"),
       tableSideSection: document.getElementById("tableSideSection"),
       matrixHeadRow: document.getElementById("matrixHeadRow"),
       matrixBody: document.getElementById("matrixBody"),

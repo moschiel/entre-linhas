@@ -52,21 +52,25 @@
         </div>
       </section>
 
-      <section id="tableSideSection" class="card hidden">
-        <div class="table-side-stack">
-          <div class="deck-pile-panel">
-            <p class="deck-visual-label">Pilha (<span id="deckPileCountLabel">0</span>)</p>
-            <div id="deckPileVisual" class="deck-pile-visual"></div>
-          </div>
-
+      <section id="tableCurrentSection" class="card hidden">
+        <div class="table-current-wrap">
           <div class="deck-current-panel">
             <p class="deck-visual-label">Carta atual</p>
             <div id="deckCurrentVisual" class="deck-current-visual">--</div>
           </div>
+        </div>
+      </section>
 
-          <div class="deck-pile-panel">
+      <section id="tableSideSection" class="card hidden">
+        <div class="table-side-stack">
+          <div class="deck-pile-panel discard-pile-panel">
             <p class="deck-visual-label">Descarte</p>
             <div id="discardPileVisual" class="deck-pile-visual empty"></div>
+          </div>
+
+          <div class="deck-pile-panel draw-pile-panel">
+            <p class="deck-visual-label">Pilha (<span id="deckPileCountLabel">0</span>)</p>
+            <div id="deckPileVisual" class="deck-pile-visual"></div>
           </div>
         </div>
       </section>

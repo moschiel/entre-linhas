@@ -184,6 +184,7 @@
     const hasActiveRound = inGame || ended;
 
     dom.deckSection.classList.toggle("hidden", !inGame);
+    dom.tableCurrentSection.classList.toggle("hidden", !hasActiveRound);
     dom.tableSideSection.classList.toggle("hidden", !hasActiveRound);
 
     if (!hasActiveRound) {
