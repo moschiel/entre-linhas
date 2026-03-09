@@ -6,14 +6,14 @@
 .matrix-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 460px;
+  /* min-width: 460px; */
 }
 
 .matrix-table th,
 .matrix-table td {
   border: 1px solid var(--line);
   text-align: center;
-  padding: 6px;
+  /* padding: 6px; */
   vertical-align: middle;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .corner-cell {
-  width: 82px;
+  /* width: 82px; */
   color: var(--muted);
 }
 
@@ -38,7 +38,7 @@
 }
 
 .row-header {
-  width: 82px;
+  /* width: 82px; */
   background: #efe4cf;
 }
 

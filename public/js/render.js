@@ -259,7 +259,7 @@
 
     if (connectedCount === capacity && canStart && inLobby) {
       dom.roomStatus.textContent = "Aguardando Host iniciar o Jogo";
-      dom.roomStatus.style.color = "green";
+      dom.roomStatus.style.color = "orange";
       return;
     }
 
