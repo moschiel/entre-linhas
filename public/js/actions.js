@@ -25,6 +25,11 @@
     }
 
     function animateDrawFlight(onDone) {
+      const snap = (value) => {
+        const ratio = window.devicePixelRatio || 1;
+        return Math.round(value * ratio) / ratio;
+      };
+
       const topCard = dom.deckPileVisual.querySelector(".deck-pile-card:last-child");
       if (!topCard) {
         onDone();
@@ -41,17 +46,13 @@
           <div class="draw-flight-face draw-flight-front"><span class="draw-flight-coord">--</span></div>
         </div>
       `;
-      ghost.style.left = `${source.left}px`;
-      ghost.style.top = `${source.top}px`;
-      ghost.style.width = `${source.width}px`;
-      ghost.style.height = `${source.height}px`;
+      ghost.style.left = `${snap(source.left)}px`;
+      ghost.style.top = `${snap(source.top)}px`;
+      ghost.style.width = `${snap(source.width)}px`;
+      ghost.style.height = `${snap(source.height)}px`;
       document.body.appendChild(ghost);
       activeFlightCoordEl = ghost.querySelector(".draw-flight-coord");
 
-      const deltaX = target.left - source.left;
-      const deltaY = target.top - source.top;
-      const scaleX = source.width > 0 ? target.width / source.width : 1;
-      const scaleY = source.height > 0 ? target.height / source.height : 1;
       let isDone = false;
       const cleanup = () => {
         if (isDone) {
@@ -60,17 +61,23 @@
         isDone = true;
         activeFlightCoordEl = null;
         ghost.removeEventListener("transitionend", handleEnd);
-        if (ghost.parentNode) {
-          ghost.parentNode.removeChild(ghost);
-        }
         onDone();
+        // Faz handoff visual: mantem o ghost por um instante sobre a carta real.
+        window.setTimeout(() => {
+          if (ghost.parentNode) {
+            ghost.parentNode.removeChild(ghost);
+          }
+        }, 120);
       };
       const handleEnd = () => cleanup();
 
       ghost.addEventListener("transitionend", handleEnd);
       window.requestAnimationFrame(() => {
         ghost.classList.add("is-flipping");
-        ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`;
+        ghost.style.left = `${snap(target.left)}px`;
+        ghost.style.top = `${snap(target.top)}px`;
+        ghost.style.width = `${snap(target.width)}px`;
+        ghost.style.height = `${snap(target.height)}px`;
         ghost.style.opacity = "0.96";
       });
 
