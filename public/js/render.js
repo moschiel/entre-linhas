@@ -178,13 +178,19 @@
           .map((col) => {
             const coord = `${row.key}${col.key}`;
             const placed = placements[coord];
+            const hoverClass = gameState.hoveredBoardCoord === coord ? " drop-hover" : "";
 
             if (!placed) {
-              return `<td class="coord-cell" data-coord="${coord}">${coord}</td>`;
+              return `<td class="coord-cell${hoverClass}" data-coord="${coord}"><div class="coord-slot-label">${coord}</div></td>`;
             }
 
             const selectedClass = gameState.selectedBoardCoord === coord ? " selected" : "";
-            return `<td class="coord-cell filled${selectedClass}" data-coord="${coord}"><div>${coord}</div><div class="coord-mini">${placed.placedByName}</div></td>`;
+            return `<td class="coord-cell filled${selectedClass}${hoverClass}" data-coord="${coord}">
+              <div class="board-card board-card-faceup">
+                <div class="board-card-coord">${placed.cardCoord || placed.coord}</div>
+              </div>
+              <div class="coord-mini">${placed.placedByName}</div>
+            </td>`;
           })
           .join("");
 
@@ -259,7 +265,8 @@
     dom.deckPileCountLabel.textContent = String(game.drawPileCount || 0);
     const hasPrivateCard = Boolean(gameState.myPrivateCard);
     const hasCard = hasPrivateCard && !gameState.drawFlightInProgress;
-    dom.myCardValue.textContent = hasCard ? gameState.myPrivateCard.coord : "nenhuma";
+    const myCardVisible = hasCard && !gameState.dragState.active && !gameState.placingCardInProgress;
+    dom.myCardValue.textContent = myCardVisible ? gameState.myPrivateCard.coord : "nenhuma";
     const pileCount = Number(game.drawPileCount || 0);
     const discardedCount = Number(game.discardPileCount || 0);
     renderDeckPileVisual(dom.deckPileVisual, pileCount);
@@ -283,7 +290,7 @@
 
       const isMe = role === gameState.myRoleValue;
       const roleHasCard = Boolean(player && player.hasCard);
-      const shouldShowMyCard = isMe && hasCard;
+      const shouldShowMyCard = isMe && myCardVisible;
       const roleFlightInProgress = Boolean(gameState.drawFlightsByRole && gameState.drawFlightsByRole[role]);
       visual.classList.remove("facedown");
 
@@ -305,12 +312,12 @@
       }
     });
 
-    const canDraw = pileCount > 0 && !hasCard;
+    const canDraw = pileCount > 0 && !hasCard && !gameState.dragState.active && !gameState.placingCardInProgress;
     dom.deckPileVisual.classList.toggle("can-draw", canDraw);
 
     syncElementVisibility(dom.drawCardBtn, false);
-    syncElementVisibility(dom.placeCardBtn, hasCard);
-    syncElementVisibility(dom.discardCardBtn, hasCard);
+    syncElementVisibility(dom.placeCardBtn, false);
+    syncElementVisibility(dom.discardCardBtn, hasCard && !gameState.dragState.active && !gameState.placingCardInProgress);
     syncElementVisibility(dom.invalidateCardBtn, gameState.isHost() && Boolean(gameState.selectedBoardCoord));
 
     const discardedCountForList = game.discardPileCount || 0;
@@ -352,8 +359,18 @@
       dom.summaryDiscarded.textContent = "0";
     }
 
+    if (gameState.placingCardInProgress) {
+      dom.drawHint.textContent = "Colocando carta no tabuleiro...";
+      return;
+    }
+
+    if (gameState.dragState.active) {
+      dom.drawHint.textContent = "Solte sua carta sobre uma celula da matriz.";
+      return;
+    }
+
     if (hasCard) {
-      dom.drawHint.textContent = "Voce ja tem uma carta. Se quiser, use Colocar no tabuleiro.";
+      dom.drawHint.textContent = "Arraste sua carta atual para uma celula do tabuleiro.";
       return;
     }
 

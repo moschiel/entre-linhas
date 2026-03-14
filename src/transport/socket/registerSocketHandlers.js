@@ -108,14 +108,15 @@ function registerSocketHandlers(io, sessionState) {
       emitPrivateState(io, sessionState);
     });
 
-    socket.on("card:place", () => {
+    socket.on("card:place", (coord) => {
       const requester = getSlotByToken(sessionState, playerToken);
+      const safeCoord = typeof coord === "string" ? coord.trim().toUpperCase() : "";
 
-      if (!requester) {
+      if (!requester || !safeCoord) {
         return;
       }
 
-      if (!placeCard(sessionState, requester)) {
+      if (!placeCard(sessionState, requester, safeCoord)) {
         return;
       }
 

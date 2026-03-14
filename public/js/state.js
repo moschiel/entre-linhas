@@ -5,6 +5,13 @@
     lastGameState: null,
     lastPublicState: null,
     selectedBoardCoord: null,
+    hoveredBoardCoord: null,
+    dragState: {
+      active: false,
+      pointerId: null,
+      hoverCoord: null,
+    },
+    placingCardInProgress: false,
     drawFlightInProgress: false,
     drawFlightsByRole: {},
     roleHasCardMap: {},

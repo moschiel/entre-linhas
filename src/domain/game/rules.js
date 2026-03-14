@@ -56,7 +56,7 @@ function drawCard(sessionState, role) {
   return true;
 }
 
-function placeCard(sessionState, requester) {
+function placeCard(sessionState, requester, targetCoord) {
   if (sessionState.game.phase !== "in_game") {
     return false;
   }
@@ -66,13 +66,18 @@ function placeCard(sessionState, requester) {
     return false;
   }
 
-  const coord = card.coord;
+  const coord = typeof targetCoord === "string" ? targetCoord.trim().toUpperCase() : "";
+  if (!coord) {
+    return false;
+  }
+
   if (sessionState.game.boardPlacements[coord]) {
     return false;
   }
 
   sessionState.game.boardPlacements[coord] = {
     coord,
+    cardCoord: card.coord,
     placedByRole: requester.role,
     placedByName: requester.name,
     placedAt: Date.now(),
