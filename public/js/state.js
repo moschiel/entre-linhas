@@ -10,6 +10,8 @@
       active: false,
       pointerId: null,
       hoverCoord: null,
+      sourceType: null,
+      sourceCoord: null,
     },
     placingCardInProgress: false,
     drawFlightInProgress: false,

@@ -8,6 +8,7 @@ const {
   startGame,
   drawCard,
   placeCard,
+  movePlacedCard,
   discardCard,
   invalidateCard,
   endGame,
@@ -132,6 +133,23 @@ function registerSocketHandlers(io, sessionState) {
       }
 
       if (!discardCard(sessionState, requester)) {
+        return;
+      }
+
+      emitState(io, sessionState);
+      emitPrivateState(io, sessionState);
+    });
+
+    socket.on("card:move", (payload) => {
+      const requester = getSlotByToken(sessionState, playerToken);
+      const fromCoord = payload && typeof payload.from === "string" ? payload.from.trim().toUpperCase() : "";
+      const toCoord = payload && typeof payload.to === "string" ? payload.to.trim().toUpperCase() : "";
+
+      if (!requester || !fromCoord || !toCoord) {
+        return;
+      }
+
+      if (!movePlacedCard(sessionState, requester, fromCoord, toCoord)) {
         return;
       }
 

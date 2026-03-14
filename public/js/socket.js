@@ -85,6 +85,7 @@
 
     socket.on("state:update", (state) => {
       const normalizedState = normalizeState(state);
+      gameState.placingCardInProgress = false;
       const nextRoleHasCardMap = {};
       (normalizedState.players || []).forEach((player) => {
         nextRoleHasCardMap[player.role] = Boolean(player.hasCard);

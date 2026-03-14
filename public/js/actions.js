@@ -83,6 +83,29 @@
       );
     }
 
+    function getPlacementByCoord(coord) {
+      const game = gameState.lastGameState;
+      if (!game || !Array.isArray(game.boardPlacements)) {
+        return null;
+      }
+
+      return game.boardPlacements.find((placement) => placement.coord === coord) || null;
+    }
+
+    function canDragPlacedCard(coord) {
+      const game = gameState.lastGameState;
+      const placement = getPlacementByCoord(coord);
+      return Boolean(
+        game
+        && game.phase === "in_game"
+        && placement
+        && placement.placedByRole === gameState.myRoleValue
+        && !gameState.drawFlightInProgress
+        && !gameState.placingCardInProgress
+        && !activeBoardDrag,
+      );
+    }
+
     function cleanupBoardDrag(shouldRenderDeck) {
       if (!activeBoardDrag) {
         return;
@@ -101,6 +124,8 @@
       gameState.dragState.active = false;
       gameState.dragState.pointerId = null;
       gameState.dragState.hoverCoord = null;
+      gameState.dragState.sourceType = null;
+      gameState.dragState.sourceCoord = null;
       syncHoveredCoord(null);
       if (shouldRenderDeck) {
         render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
@@ -140,10 +165,12 @@
       const hasPlacement = Boolean(
         gameState.lastGameState
         && Array.isArray(gameState.lastGameState.boardPlacements)
-        && gameState.lastGameState.boardPlacements.find((placement) => placement.coord === targetCoord)
+        && gameState.lastGameState.boardPlacements.find(
+          (placement) => placement.coord === targetCoord && placement.coord !== activeBoardDrag.sourceCoord,
+        )
       );
 
-      if (!targetCell || hasPlacement) {
+      if (!targetCell || hasPlacement || targetCoord === activeBoardDrag.sourceCoord) {
         cleanupBoardDrag(true);
         return;
       }
@@ -170,8 +197,19 @@
         .catch(() => {})
         .finally(() => {
           gameState.placingCardInProgress = true;
+          const dragMode = activeBoardDrag.mode;
+          const sourceCoord = activeBoardDrag.sourceCoord;
           cleanupBoardDrag(false);
+          render.renderBoard(dom, gameState, gameState.lastGameState);
           render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+          if (dragMode === "board" && sourceCoord) {
+            socket.emit("card:move", {
+              from: sourceCoord,
+              to: targetCoord,
+            });
+            return;
+          }
+
           socket.emit("card:place", targetCoord);
         });
     }
@@ -223,6 +261,7 @@
       document.body.appendChild(ghost);
 
       activeBoardDrag = {
+        mode: "hand",
         pointerId: event.pointerId,
         sourceEl,
         ghost,
@@ -231,8 +270,59 @@
       };
       gameState.dragState.active = true;
       gameState.dragState.pointerId = event.pointerId;
+      gameState.dragState.sourceType = "hand";
+      gameState.dragState.sourceCoord = null;
       sourceEl.classList.add("dragging");
       render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+      updateBoardDragPosition(event.clientX, event.clientY);
+
+      window.addEventListener("pointermove", handleBoardDragMove);
+      window.addEventListener("pointerup", handleBoardDragEnd);
+      window.addEventListener("pointercancel", handleBoardDragCancel);
+      event.preventDefault();
+    }
+
+    function startPlacedCardDrag(event) {
+      const targetCard = event.target.closest(".board-card.movable");
+      if (!targetCard) {
+        return;
+      }
+
+      const coordCell = targetCard.closest(".coord-cell");
+      const sourceCoord = coordCell ? coordCell.dataset.coord || null : null;
+      if (!sourceCoord || !canDragPlacedCard(sourceCoord)) {
+        return;
+      }
+
+      const placement = getPlacementByCoord(sourceCoord);
+      if (!placement) {
+        return;
+      }
+
+      const rect = targetCard.getBoundingClientRect();
+      const ghost = document.createElement("div");
+      ghost.className = "board-drag-ghost";
+      ghost.textContent = placement.cardCoord || placement.coord;
+      ghost.style.left = `${rect.left}px`;
+      ghost.style.top = `${rect.top}px`;
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.height = `${rect.height}px`;
+      document.body.appendChild(ghost);
+
+      activeBoardDrag = {
+        mode: "board",
+        pointerId: event.pointerId,
+        sourceEl: targetCard,
+        sourceCoord,
+        ghost,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+      };
+      gameState.dragState.active = true;
+      gameState.dragState.pointerId = event.pointerId;
+      gameState.dragState.sourceType = "board";
+      gameState.dragState.sourceCoord = sourceCoord;
+      render.renderBoard(dom, gameState, gameState.lastGameState);
       updateBoardDragPosition(event.clientX, event.clientY);
 
       window.addEventListener("pointermove", handleBoardDragMove);
@@ -442,6 +532,8 @@
     dom.placeCardBtn.addEventListener("click", () => {
       // Fluxo antigo mantido apenas por compatibilidade visual; o uso real agora e por drag.
     });
+
+    dom.matrixBody.addEventListener("pointerdown", startPlacedCardDrag);
 
     dom.discardCardBtn.addEventListener("click", () => {
       socket.emit("card:discard");

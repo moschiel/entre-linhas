@@ -88,6 +88,38 @@ function placeCard(sessionState, requester, targetCoord) {
   return true;
 }
 
+function movePlacedCard(sessionState, requester, fromCoord, targetCoord) {
+  if (sessionState.game.phase !== "in_game") {
+    return false;
+  }
+
+  const from = typeof fromCoord === "string" ? fromCoord.trim().toUpperCase() : "";
+  const target = typeof targetCoord === "string" ? targetCoord.trim().toUpperCase() : "";
+  if (!from || !target || from === target) {
+    return false;
+  }
+
+  const placement = sessionState.game.boardPlacements[from];
+  if (!placement) {
+    return false;
+  }
+
+  if (placement.placedByRole !== requester.role) {
+    return false;
+  }
+
+  if (sessionState.game.boardPlacements[target]) {
+    return false;
+  }
+
+  delete sessionState.game.boardPlacements[from];
+  sessionState.game.boardPlacements[target] = {
+    ...placement,
+    coord: target,
+  };
+  return true;
+}
+
 function discardCard(sessionState, requester) {
   if (sessionState.game.phase !== "in_game") {
     return false;
@@ -147,6 +179,7 @@ module.exports = {
   startGame,
   drawCard,
   placeCard,
+  movePlacedCard,
   discardCard,
   invalidateCard,
   endGame,

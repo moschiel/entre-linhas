@@ -188,14 +188,18 @@
             const coord = `${row.key}${col.key}`;
             const placed = placements[coord];
             const hoverClass = gameState.hoveredBoardCoord === coord ? " drop-hover" : "";
+            const isMovingSource = gameState.dragState.active
+              && gameState.dragState.sourceType === "board"
+              && gameState.dragState.sourceCoord === coord;
 
-            if (!placed) {
+            if (!placed || isMovingSource) {
               return `<td class="coord-cell${hoverClass}" data-coord="${coord}"><div class="coord-slot-label">${coord}</div></td>`;
             }
 
             const selectedClass = gameState.selectedBoardCoord === coord ? " selected" : "";
+            const movableClass = placed.placedByRole === gameState.myRoleValue && game.phase === "in_game" ? " movable" : "";
             return `<td class="coord-cell filled${selectedClass}${hoverClass}" data-coord="${coord}">
-              <div class="board-card board-card-faceup">
+              <div class="board-card board-card-faceup${movableClass}" data-card-coord="${placed.cardCoord || placed.coord}">
                 <div class="board-card-coord">${placed.cardCoord || placed.coord}</div>
               </div>
               ${uiConfig.showPlacedCardOwner ? `<div class="coord-mini">${placed.placedByName}</div>` : ""}
