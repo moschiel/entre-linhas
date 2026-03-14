@@ -42,7 +42,7 @@
         return dom.currentCardHostVisual;
       }
       if (seat === 2) {
-        return dom.currentCardGuestVisual;
+        return dom.currentCardPlayer2Visual;
       }
       if (seat === 3) {
         return dom.currentCardPlayer3Visual;
@@ -589,7 +589,7 @@
       submitPlayerName(dom.nameInput.value);
     });
 
-    [dom.editNameBtnHost, dom.editNameBtnGuest, dom.editNameBtnPlayer3, dom.editNameBtnPlayer4].forEach((button) => {
+    [dom.editNameBtnHost, dom.editNameBtnPlayer2, dom.editNameBtnPlayer3, dom.editNameBtnPlayer4].forEach((button) => {
       button.addEventListener("click", () => {
         openEditNameModal();
       });
@@ -655,7 +655,7 @@
 
     [
       dom.currentCardHostVisual,
-      dom.currentCardGuestVisual,
+      dom.currentCardPlayer2Visual,
       dom.currentCardPlayer3Visual,
       dom.currentCardPlayer4Visual,
     ].forEach((element) => {

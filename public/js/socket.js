@@ -1,7 +1,7 @@
 (function initSocketModule(global) {
   const DEFAULT_PLAYER_SLOTS = [
     { slotKey: "seat1", seat: 1, systemRole: "host", defaultName: "Host" },
-    { slotKey: "seat2", seat: 2, systemRole: "guest", defaultName: "Convidado" },
+    { slotKey: "seat2", seat: 2, systemRole: "guest", defaultName: "Jogador 2" },
     { slotKey: "seat3", seat: 3, systemRole: "guest", defaultName: "Jogador 3" },
     { slotKey: "seat4", seat: 4, systemRole: "guest", defaultName: "Jogador 4" },
   ];

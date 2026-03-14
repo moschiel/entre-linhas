@@ -11,7 +11,7 @@
   function getPlayerStatusElements(dom) {
     return {
       1: dom.playerStateHost,
-      2: dom.playerStateGuest,
+      2: dom.playerStatePlayer2,
       3: dom.playerStatePlayer3,
       4: dom.playerStatePlayer4,
     };
@@ -20,7 +20,7 @@
   function getCardLabelElements(dom) {
     return {
       1: dom.currentCardLabelHost,
-      2: dom.currentCardLabelGuest,
+      2: dom.currentCardLabelPlayer2,
       3: dom.currentCardLabelPlayer3,
       4: dom.currentCardLabelPlayer4,
     };
@@ -29,7 +29,7 @@
   function getCardVisualElements(dom) {
     return {
       1: dom.currentCardHostVisual,
-      2: dom.currentCardGuestVisual,
+      2: dom.currentCardPlayer2Visual,
       3: dom.currentCardPlayer3Visual,
       4: dom.currentCardPlayer4Visual,
     };
@@ -47,7 +47,7 @@
   function getCardPanelElements(dom) {
     return {
       1: dom.currentCardPanelHost,
-      2: dom.currentCardPanelGuest,
+      2: dom.currentCardPanelPlayer2,
       3: dom.currentCardPanelPlayer3,
       4: dom.currentCardPanelPlayer4,
     };
@@ -56,7 +56,7 @@
   function getEditNameButtonElements(dom) {
     return {
       1: dom.editNameBtnHost,
-      2: dom.editNameBtnGuest,
+      2: dom.editNameBtnPlayer2,
       3: dom.editNameBtnPlayer3,
       4: dom.editNameBtnPlayer4,
     };
@@ -449,12 +449,12 @@
       if (disconnectedSeat && statusContext.mySeat && disconnectedSeat === statusContext.mySeat) {
         dom.roomIssueTitle.textContent = "Reconexao pendente";
         dom.roomIssueMessage.textContent = "Sua conexao com a partida foi interrompida. Aguarde reconectar para continuar.";
-      } else if (disconnectedName) {
-        dom.roomIssueTitle.textContent = "Partida pausada";
-        dom.roomIssueMessage.textContent = `${disconnectedName} ficou offline. Aguarde a reconexao para continuar a partida.`;
+      } else if (game.hostOffline && disconnectedName) {
+        dom.roomIssueTitle.textContent = "Host offline";
+        dom.roomIssueMessage.textContent = `${disconnectedName} saiu da sala. Aguarde o host reconectar para continuar a partida.`;
       } else {
-        dom.roomIssueTitle.textContent = "Partida pausada";
-        dom.roomIssueMessage.textContent = "Um jogador ficou offline. Aguarde a reconexao para continuar a partida.";
+        dom.roomIssueModal.classList.add("hidden");
+        return;
       }
       dom.roomIssueModal.classList.remove("hidden");
       return;
