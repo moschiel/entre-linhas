@@ -1,6 +1,9 @@
 const {
   getAssignedSlots,
+  getSlotBySeat,
   getSlotByToken,
+  isBlockedPlayerToken,
+  blockPlayerToken,
   assignNewSlot,
   takeOfflineSlot,
 } = require("../../session/playerSlots");
@@ -11,6 +14,7 @@ const {
   movePlacedCard,
   discardCard,
   discardPlacedCard,
+  removePlayer,
   invalidateCard,
   endGame,
 } = require("../../domain/game/rules");
@@ -23,6 +27,14 @@ function registerSocketHandlers(io, sessionState) {
 
     if (!playerToken) {
       socket.emit("session:invalid", "Token de jogador ausente.");
+      socket.disconnect(true);
+      return;
+    }
+
+    if (isBlockedPlayerToken(sessionState, playerToken)) {
+      socket.emit("session:removed", {
+        message: "Voce foi removido da sala pelo host.",
+      });
       socket.disconnect(true);
       return;
     }
@@ -196,6 +208,41 @@ function registerSocketHandlers(io, sessionState) {
 
       if (!endGame(sessionState)) {
         return;
+      }
+
+      emitState(io, sessionState);
+      emitPrivateState(io, sessionState);
+    });
+
+    socket.on("player:remove", (targetSeatRaw) => {
+      const requester = getSlotByToken(sessionState, playerToken);
+      const targetSeat = Number(targetSeatRaw);
+
+      if (!requester || requester.systemRole !== "host" || !Number.isInteger(targetSeat)) {
+        return;
+      }
+
+      const targetBeforeRemoval = getSlotBySeat(sessionState, targetSeat);
+      if (!targetBeforeRemoval || targetBeforeRemoval.systemRole === "host") {
+        return;
+      }
+
+      const removedSlot = removePlayer(sessionState, requester, targetSeat);
+      if (!removedSlot) {
+        return;
+      }
+
+      blockPlayerToken(sessionState, removedSlot.playerToken);
+
+      if (removedSlot.socketId) {
+        io.to(removedSlot.socketId).emit("session:removed", {
+          message: "Voce foi removido da sala pelo host.",
+        });
+
+        const targetSocket = io.sockets.sockets.get(removedSlot.socketId);
+        if (targetSocket) {
+          targetSocket.disconnect(true);
+        }
       }
 
       emitState(io, sessionState);

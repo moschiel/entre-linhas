@@ -22,9 +22,18 @@
 
 .player-row {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
   padding: 8px 0;
   border-top: 1px dashed var(--line);
+}
+
+.player-row .label {
+  min-width: 82px;
+}
+
+.player-row > span[id^="playerState"] {
+  flex: 1;
 }
 
 .player-row:first-of-type {

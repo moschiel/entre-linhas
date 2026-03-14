@@ -11,6 +11,7 @@ function createSessionState() {
     seat2: null,
     seat3: null,
     seat4: null,
+    blockedPlayerTokens: new Set(),
     game: {
       phase: "lobby",
       startedAt: null,

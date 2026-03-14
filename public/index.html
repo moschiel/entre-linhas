@@ -40,14 +40,20 @@
             <div id="currentCardPanelHost" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelHost">Host</p>
-                <button id="editNameBtnHost" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Host">✎</button>
+                <div class="player-label-actions">
+                  <button id="editNameBtnHost" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Host">✎</button>
+                  <button id="removePlayerBtnHost" class="player-remove-btn hidden" type="button" aria-label="Remover Host">x</button>
+                </div>
               </div>
               <div id="currentCardHostVisual" class="deck-current-visual">--</div>
             </div>
             <div id="currentCardPanelPlayer3" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelPlayer3">Jogador 3</p>
-                <button id="editNameBtnPlayer3" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 3">✎</button>
+                <div class="player-label-actions">
+                  <button id="editNameBtnPlayer3" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 3">✎</button>
+                  <button id="removePlayerBtnPlayer3" class="player-remove-btn hidden" type="button" aria-label="Remover Jogador 3">x</button>
+                </div>
               </div>
               <div id="currentCardPlayer3Visual" class="deck-current-visual">--</div>
             </div>
@@ -76,14 +82,20 @@
             <div id="currentCardPanelPlayer2" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelPlayer2">Jogador 2</p>
-                <button id="editNameBtnPlayer2" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 2">✎</button>
+                <div class="player-label-actions">
+                  <button id="editNameBtnPlayer2" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 2">✎</button>
+                  <button id="removePlayerBtnPlayer2" class="player-remove-btn hidden" type="button" aria-label="Remover Jogador 2">x</button>
+                </div>
               </div>
               <div id="currentCardPlayer2Visual" class="deck-current-visual">--</div>
             </div>
             <div id="currentCardPanelPlayer4" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelPlayer4">Jogador 4</p>
-                <button id="editNameBtnPlayer4" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 4">✎</button>
+                <div class="player-label-actions">
+                  <button id="editNameBtnPlayer4" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 4">✎</button>
+                  <button id="removePlayerBtnPlayer4" class="player-remove-btn hidden" type="button" aria-label="Remover Jogador 4">x</button>
+                </div>
               </div>
               <div id="currentCardPlayer4Visual" class="deck-current-visual">--</div>
             </div>
@@ -111,21 +123,25 @@
         <div class="player-row">
           <span class="label">Host</span>
           <span id="playerStateHost">vazio</span>
+          <button id="removeLobbyPlayerBtnHost" class="player-remove-btn hidden" type="button" aria-label="Remover Host">x</button>
         </div>
 
         <div class="player-row">
           <span class="label">Jogador 2</span>
           <span id="playerStatePlayer2">vazio</span>
+          <button id="removeLobbyPlayerBtnPlayer2" class="player-remove-btn hidden" type="button" aria-label="Remover Jogador 2">x</button>
         </div>
 
         <div class="player-row">
           <span class="label">Jogador 3</span>
           <span id="playerStatePlayer3">vazio</span>
+          <button id="removeLobbyPlayerBtnPlayer3" class="player-remove-btn hidden" type="button" aria-label="Remover Jogador 3">x</button>
         </div>
 
         <div class="player-row">
           <span class="label">Jogador 4</span>
           <span id="playerStatePlayer4">vazio</span>
+          <button id="removeLobbyPlayerBtnPlayer4" class="player-remove-btn hidden" type="button" aria-label="Remover Jogador 4">x</button>
         </div>
       </section>
 
@@ -190,6 +206,29 @@
           <button id="endGameModalCancelBtn" type="button">Cancelar</button>
           <button id="endGameModalConfirmBtn" class="danger" type="button">Encerrar</button>
         </div>
+      </div>
+    </div>
+
+    <div id="removePlayerModal" class="modal-overlay hidden">
+      <div class="modal-card modal-card-compact">
+        <div class="modal-header">
+          <h2>Remover jogador</h2>
+          <button id="removePlayerModalCloseBtn" class="modal-close-btn" type="button" aria-label="Fechar remocao de jogador">x</button>
+        </div>
+        <p id="removePlayerModalMessage">Tem certeza que deseja remover este jogador da sala?</p>
+        <div class="actions-row top-gap">
+          <button id="removePlayerModalCancelBtn" type="button">Cancelar</button>
+          <button id="removePlayerModalConfirmBtn" class="danger" type="button">Remover</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="removedFromSessionModal" class="modal-overlay hidden">
+      <div class="modal-card modal-card-compact">
+        <div class="modal-header">
+          <h2>Voce foi removido</h2>
+        </div>
+        <p id="removedFromSessionMessage">O host removeu voce da sala.</p>
       </div>
     </div>
 

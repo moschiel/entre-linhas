@@ -1,7 +1,7 @@
 const { buildMatrixWords, buildCoordinateDeck } = require("./deck");
 const { computeFinalSummary } = require("./summary");
 const { resetGameToLobby } = require("./sessionState");
-const { PLAYER_SLOTS } = require("../../session/playerSlots");
+const { PLAYER_SLOTS, getSlotBySeat, removeSlot } = require("../../session/playerSlots");
 
 function maybeFinishGame(sessionState) {
   if (sessionState.game.phase !== "in_game") {
@@ -170,6 +170,40 @@ function discardPlacedCard(sessionState, requester, sourceCoord) {
   return true;
 }
 
+function removePlayer(sessionState, requester, targetSeat) {
+  if (!requester || requester.systemRole !== "host") {
+    return null;
+  }
+
+  const seat = Number(targetSeat);
+  if (!Number.isInteger(seat) || seat === requester.seat) {
+    return null;
+  }
+
+  const target = getSlotBySeat(sessionState, seat);
+  if (!target || target.systemRole === "host") {
+    return null;
+  }
+
+  const handCard = sessionState.game.hands[target.slotKey];
+  if (handCard) {
+    sessionState.game.discardPile.push({
+      coord: handCard.coord,
+      source: "hand",
+      discardedBySeat: requester.seat,
+      discardedBySystemRole: requester.systemRole,
+      discardedByName: requester.name,
+      removedPlayerName: target.name,
+      discardedAt: Date.now(),
+    });
+    sessionState.game.hands[target.slotKey] = null;
+  }
+
+  const removed = removeSlot(sessionState, target.slotKey);
+  maybeFinishGame(sessionState);
+  return removed;
+}
+
 function invalidateCard(sessionState, requester, safeCoord) {
   if (sessionState.game.phase !== "in_game") {
     return false;
@@ -210,6 +244,7 @@ module.exports = {
   movePlacedCard,
   discardCard,
   discardPlacedCard,
+  removePlayer,
   invalidateCard,
   endGame,
 };

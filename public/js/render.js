@@ -63,6 +63,24 @@
     };
   }
 
+  function getPanelRemoveButtonElements(dom) {
+    return {
+      1: dom.removePlayerBtnHost,
+      2: dom.removePlayerBtnPlayer2,
+      3: dom.removePlayerBtnPlayer3,
+      4: dom.removePlayerBtnPlayer4,
+    };
+  }
+
+  function getLobbyRemoveButtonElements(dom) {
+    return {
+      1: dom.removeLobbyPlayerBtnHost,
+      2: dom.removeLobbyPlayerBtnPlayer2,
+      3: dom.removeLobbyPlayerBtnPlayer3,
+      4: dom.removeLobbyPlayerBtnPlayer4,
+    };
+  }
+
   function setVisibility(element, visible) {
     element.classList.toggle("hidden", !visible);
   }
@@ -146,6 +164,7 @@
     if (isLobby) {
       dom.editNameModal.classList.add("hidden");
       dom.endGameModal.classList.add("hidden");
+      dom.removePlayerModal.classList.add("hidden");
     }
 
     if (!state || !state.game) {
@@ -257,6 +276,7 @@
     const cardPanels = getCardPanelElements(dom);
     const cardLabels = getCardLabelElements(dom);
     const editNameButtons = getEditNameButtonElements(dom);
+    const removeButtons = getPanelRemoveButtonElements(dom);
 
     dom.tableLeftPlayersSection.classList.toggle("hidden", !hasActiveRound);
     dom.tableRightPlayersSection.classList.toggle("hidden", !hasActiveRound);
@@ -268,6 +288,7 @@
         const visual = cardVisuals[seat];
         const panel = cardPanels[seat];
         const editButton = editNameButtons[seat];
+        const removeButton = removeButtons[seat];
         if (!visual) {
           return;
         }
@@ -278,6 +299,10 @@
         }
         if (editButton) {
           editButton.classList.add("hidden");
+        }
+        if (removeButton) {
+          removeButton.classList.add("hidden");
+          removeButton.disabled = false;
         }
       });
       renderDeckPileVisual(dom.deckPileVisual, 0);
@@ -334,6 +359,12 @@
       const isMe = seat === gameState.mySeatValue;
       if (editButton) {
         editButton.classList.toggle("hidden", !isMe);
+      }
+      const removeButton = removeButtons[seat];
+      if (removeButton) {
+        const canRemovePlayer = gameState.isHost() && isOccupied && seat !== 1;
+        removeButton.classList.toggle("hidden", !canRemovePlayer);
+        removeButton.disabled = seat === gameState.pendingRemovalSeat;
       }
       const roleHasCard = Boolean(player && player.hasCard);
       const shouldShowMyCard = isMe && myCardVisible;
@@ -463,7 +494,7 @@
     dom.roomIssueModal.classList.add("hidden");
   }
 
-  function renderPlayers(dom, state) {
+  function renderPlayers(dom, state, gameState) {
     const gamePhase = state && state.game ? state.game.phase : "lobby";
     dom.playersSection.classList.toggle("hidden", gamePhase !== "lobby");
 
@@ -474,8 +505,10 @@
     });
 
     const statusElements = getPlayerStatusElements(dom);
+    const removeButtons = getLobbyRemoveButtonElements(dom);
     PLAYER_SEAT_ORDER.forEach((seat) => {
       const target = statusElements[seat];
+      const removeButton = removeButtons[seat];
       if (!target) {
         return;
       }
@@ -483,10 +516,19 @@
       const player = playerBySeat[seat];
       if (!player || !player.occupied) {
         target.textContent = "vazio";
+        if (removeButton) {
+          removeButton.classList.add("hidden");
+          removeButton.disabled = false;
+        }
         return;
       }
 
       target.textContent = formatSlot(player);
+      if (removeButton) {
+        const canRemovePlayer = gamePhase === "lobby" && gameState && gameState.isHost() && seat !== 1;
+        removeButton.classList.toggle("hidden", !canRemovePlayer);
+        removeButton.disabled = Boolean(gameState && seat === gameState.pendingRemovalSeat);
+      }
     });
   }
 

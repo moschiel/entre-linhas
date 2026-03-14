@@ -20,6 +20,9 @@
     drawFlightInProgress: false,
     drawFlightsBySeat: {},
     seatHasCardMap: {},
+    pendingRemovalSeat: null,
+    removedFromSession: false,
+    removedMessage: "",
     isHost() {
       return this.mySystemRole === "host";
     },

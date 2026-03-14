@@ -125,7 +125,7 @@
         disconnectedName: disconnectedPlayer ? disconnectedPlayer.name : null,
         mySeat: gameState.mySeatValue,
       };
-      render.renderPlayers(dom, normalizedState);
+      render.renderPlayers(dom, normalizedState, gameState);
       render.renderGameStatus(dom, normalizedState.game, gameState.statusContext);
       render.renderActionButtons(dom, normalizedState, gameState);
       render.renderBoard(dom, gameState, normalizedState.game);
@@ -143,7 +143,25 @@
       dom.hostMenuBtn.classList.add("hidden");
     });
 
+    socket.on("session:removed", (payload) => {
+      const message = payload && typeof payload.message === "string" && payload.message.trim().length > 0
+        ? payload.message.trim()
+        : "O host removeu voce da sala.";
+
+      gameState.removedFromSession = true;
+      gameState.removedMessage = message;
+      gameState.connectionState = "removed";
+      dom.connectionStatus.textContent = "Removido da sala";
+      dom.connectionStatus.style.color = "red";
+      dom.removedFromSessionMessage.textContent = message;
+      dom.removedFromSessionModal.classList.remove("hidden");
+      socket.disconnect();
+    });
+
     socket.on("connect_error", () => {
+      if (gameState.removedFromSession) {
+        return;
+      }
       dom.connectionStatus.textContent = "Falha de conexao";
       dom.connectionStatus.style.color = "red";
       gameState.connectionState = "error";
@@ -151,6 +169,9 @@
     });
 
     socket.on("disconnect", () => {
+      if (gameState.removedFromSession) {
+        return;
+      }
       dom.connectionStatus.textContent = "Desconectado - tentando reconectar";
       dom.connectionStatus.style.color = "orange";
       gameState.connectionState = "disconnected";
@@ -158,6 +179,9 @@
     });
 
     socket.io.on("reconnect_attempt", () => {
+      if (gameState.removedFromSession) {
+        return;
+      }
       dom.connectionStatus.textContent = "Reconectando...";
       dom.connectionStatus.style.color = "orange";
       gameState.connectionState = "reconnecting";
@@ -165,6 +189,9 @@
     });
 
     socket.io.on("reconnect", () => {
+      if (gameState.removedFromSession) {
+        return;
+      }
       dom.connectionStatus.textContent = "Reconectado";
       dom.connectionStatus.style.color = "green";
       gameState.connectionState = "connected";

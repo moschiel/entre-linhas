@@ -13,8 +13,34 @@ function getAssignedSlots(sessionState) {
   return getAllSlots(sessionState);
 }
 
+function getSlotBySeat(sessionState, seat) {
+  return getAllSlots(sessionState).find((slot) => slot.seat === seat) || null;
+}
+
 function getSlotByToken(sessionState, playerToken) {
   return getAllSlots(sessionState).find((slot) => slot.playerToken === playerToken) || null;
+}
+
+function isBlockedPlayerToken(sessionState, playerToken) {
+  return Boolean(sessionState.blockedPlayerTokens && sessionState.blockedPlayerTokens.has(playerToken));
+}
+
+function blockPlayerToken(sessionState, playerToken) {
+  if (!playerToken || !sessionState.blockedPlayerTokens) {
+    return;
+  }
+
+  sessionState.blockedPlayerTokens.add(playerToken);
+}
+
+function removeSlot(sessionState, slotKey) {
+  if (!slotKey || !sessionState[slotKey]) {
+    return null;
+  }
+
+  const removedSlot = sessionState[slotKey];
+  sessionState[slotKey] = null;
+  return removedSlot;
 }
 
 function assignNewSlot(sessionState, playerToken, socketId) {
@@ -57,7 +83,11 @@ module.exports = {
   PLAYER_SLOTS,
   getAllSlots,
   getAssignedSlots,
+  getSlotBySeat,
   getSlotByToken,
+  isBlockedPlayerToken,
+  blockPlayerToken,
+  removeSlot,
   assignNewSlot,
   takeOfflineSlot,
 };

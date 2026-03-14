@@ -56,6 +56,35 @@
       dom.editNameModal.classList.add("hidden");
     }
 
+    function getPlayerBySeat(seat) {
+      const players = (gameState.lastPublicState && gameState.lastPublicState.players) || [];
+      return players.find((player) => player.seat === seat) || null;
+    }
+
+    function openRemovePlayerModal(seat) {
+      if (!gameState.isHost()) {
+        return;
+      }
+
+      const player = getPlayerBySeat(seat);
+      if (!player || !player.occupied || seat === 1) {
+        return;
+      }
+
+      gameState.pendingRemovalSeat = seat;
+      dom.removePlayerModalMessage.textContent = `Tem certeza que deseja remover ${player.name} da sala?`;
+      dom.removePlayerModal.classList.remove("hidden");
+      render.renderPlayers(dom, gameState.lastPublicState, gameState);
+      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+    }
+
+    function closeRemovePlayerModal() {
+      gameState.pendingRemovalSeat = null;
+      dom.removePlayerModal.classList.add("hidden");
+      render.renderPlayers(dom, gameState.lastPublicState, gameState);
+      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+    }
+
     function getCardVisualBySeat(seat) {
       if (seat === 1) {
         return dom.currentCardHostVisual;
@@ -655,6 +684,21 @@
       });
     });
 
+    [
+      [dom.removePlayerBtnHost, 1],
+      [dom.removePlayerBtnPlayer2, 2],
+      [dom.removePlayerBtnPlayer3, 3],
+      [dom.removePlayerBtnPlayer4, 4],
+      [dom.removeLobbyPlayerBtnHost, 1],
+      [dom.removeLobbyPlayerBtnPlayer2, 2],
+      [dom.removeLobbyPlayerBtnPlayer3, 3],
+      [dom.removeLobbyPlayerBtnPlayer4, 4],
+    ].forEach(([button, seat]) => {
+      button.addEventListener("click", () => {
+        openRemovePlayerModal(seat);
+      });
+    });
+
     dom.editNameSaveBtn.addEventListener("click", () => {
       if (submitPlayerName(dom.editNameInput.value)) {
         closeEditNameModal();
@@ -707,6 +751,31 @@
     dom.endGameModal.addEventListener("click", (event) => {
       if (event.target === dom.endGameModal) {
         dom.endGameModal.classList.add("hidden");
+      }
+    });
+
+    dom.removePlayerModalCloseBtn.addEventListener("click", () => {
+      closeRemovePlayerModal();
+    });
+
+    dom.removePlayerModalCancelBtn.addEventListener("click", () => {
+      closeRemovePlayerModal();
+    });
+
+    dom.removePlayerModalConfirmBtn.addEventListener("click", () => {
+      if (!Number.isInteger(gameState.pendingRemovalSeat)) {
+        closeRemovePlayerModal();
+        return;
+      }
+
+      const targetSeat = gameState.pendingRemovalSeat;
+      closeRemovePlayerModal();
+      socket.emit("player:remove", targetSeat);
+    });
+
+    dom.removePlayerModal.addEventListener("click", (event) => {
+      if (event.target === dom.removePlayerModal) {
+        closeRemovePlayerModal();
       }
     });
 
