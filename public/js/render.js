@@ -346,7 +346,8 @@
       const player = playerBySeat[seat];
       const isOccupied = Boolean(player && player.occupied);
       if (panel) {
-        panel.classList.toggle("hidden", !isOccupied);
+        panel.classList.remove("hidden");
+        panel.classList.toggle("slot-gap", !isOccupied);
       }
       if (player && player.occupied) {
         label.textContent = player.online ? player.name : `${player.name} (offline)`;
@@ -358,7 +359,7 @@
 
       const isMe = seat === gameState.mySeatValue;
       if (editButton) {
-        editButton.classList.toggle("hidden", !isMe);
+        editButton.classList.toggle("hidden", !isMe || !isOccupied);
       }
       const removeButton = removeButtons[seat];
       if (removeButton) {

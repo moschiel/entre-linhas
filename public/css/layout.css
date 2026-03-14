@@ -75,11 +75,11 @@
 #tableLeftPlayersSection,
 #tableRightPlayersSection,
 #summarySection {
-  background: linear-gradient(180deg, var(--play-surface) 0%, #f5fbf6 100%);
+  background: linear-gradient(180deg, var(--play-surface) 0%, #f5fbf6 100%); 
   border-color: var(--play-line);
   box-shadow:
-    0 10px 24px var(--play-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  0 10px 24px var(--play-shadow),
+  inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 #boardSection {
@@ -99,14 +99,21 @@
   grid-column: 1;
   grid-row: 1;
   margin-bottom: 0;
-  padding: 10px;
+  /* padding: 10px; */
 }
 
 #tableRightPlayersSection {
   grid-column: 3;
   grid-row: 1;
   margin-bottom: 0;
-  padding: 10px;
+  /* padding: 10px; */
+}
+
+#tableLeftPlayersSection,
+#tableRightPlayersSection {
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 #boardSection::before {
