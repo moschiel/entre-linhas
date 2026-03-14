@@ -140,7 +140,7 @@
       dom.roomStatus.textContent = "Sala cheia";
       dom.roomStatus.style.color = "red";
       dom.startGameBtn.disabled = true;
-      dom.endGameBtn.disabled = true;
+      dom.hostMenuBtn.classList.add("hidden");
     });
 
     socket.on("connect_error", () => {

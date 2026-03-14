@@ -134,32 +134,30 @@
   }
 
   function renderActionButtons(dom, state, gameState) {
-    dom.startGameSection.classList.toggle("hidden", !gameState.isHost());
     const isLobby = !state || !state.game || state.game.phase === "lobby";
+    dom.startGameSection.classList.toggle("hidden", !gameState.isHost() || !isLobby);
     dom.gameTitle.classList.toggle("hidden", !isLobby);
     dom.statusSection.classList.toggle("hidden", !isLobby);
     dom.nameSection.classList.toggle("hidden", !isLobby);
+    dom.hostMenuBtn.classList.toggle(
+      "hidden",
+      !gameState.isHost() || isLobby || !state || !state.game || (state.game.phase !== "in_game" && state.game.phase !== "ended"),
+    );
     if (isLobby) {
       dom.editNameModal.classList.add("hidden");
+      dom.endGameModal.classList.add("hidden");
     }
 
     if (!state || !state.game) {
       dom.startGameBtn.classList.remove("hidden");
-      dom.endGameBtn.classList.add("hidden");
       dom.startGameBtn.disabled = true;
-      dom.endGameBtn.disabled = true;
       return;
     }
 
     const inGame = state.game.phase === "in_game";
     const ended = state.game.phase === "ended";
-    const hasStarted = inGame || ended;
-
-    dom.startGameBtn.classList.toggle("hidden", hasStarted);
-    dom.endGameBtn.classList.toggle("hidden", !hasStarted);
 
     dom.startGameBtn.disabled = !gameState.isHost() || !state.game.canStart;
-    dom.endGameBtn.disabled = !gameState.isHost() || (!inGame && !ended);
 
     if (!gameState.isHost()) {
       dom.actionHint.textContent = "Apenas o host pode iniciar/encerrar a partida.";

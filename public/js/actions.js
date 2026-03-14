@@ -684,8 +684,30 @@
       socket.emit("game:start");
     });
 
-    dom.endGameBtn.addEventListener("click", () => {
+    dom.hostMenuBtn.addEventListener("click", () => {
+      if (!gameState.isHost()) {
+        return;
+      }
+      dom.endGameModal.classList.remove("hidden");
+    });
+
+    dom.endGameModalCloseBtn.addEventListener("click", () => {
+      dom.endGameModal.classList.add("hidden");
+    });
+
+    dom.endGameModalCancelBtn.addEventListener("click", () => {
+      dom.endGameModal.classList.add("hidden");
+    });
+
+    dom.endGameModalConfirmBtn.addEventListener("click", () => {
+      dom.endGameModal.classList.add("hidden");
       socket.emit("game:end");
+    });
+
+    dom.endGameModal.addEventListener("click", (event) => {
+      if (event.target === dom.endGameModal) {
+        dom.endGameModal.classList.add("hidden");
+      }
     });
 
     dom.discardHistoryBtn.addEventListener("click", () => {

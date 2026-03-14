@@ -30,7 +30,6 @@
         <h2>Partida</h2>
         <div class="actions-row">
           <button id="startGameBtn" disabled>Iniciar jogo</button>
-          <button id="endGameBtn" class="danger" disabled>Encerrar jogo</button>
         </div>
         <p id="actionHint" class="hint">Apenas o host inicia/encerra a partida.</p>
       </section>
@@ -145,6 +144,8 @@
       </section>
     </main>
 
+    <button id="hostMenuBtn" class="host-menu-btn hidden" type="button" aria-label="Acoes do host">⋮</button>
+
     <div id="discardHistoryModal" class="modal-overlay hidden">
       <div class="modal-card">
         <div class="modal-header">
@@ -175,6 +176,20 @@
           <h2 id="roomIssueTitle">Status da sala</h2>
         </div>
         <p id="roomIssueMessage">Aguardando atualizacao da sala.</p>
+      </div>
+    </div>
+
+    <div id="endGameModal" class="modal-overlay hidden">
+      <div class="modal-card modal-card-compact">
+        <div class="modal-header">
+          <h2>Encerrar partida</h2>
+          <button id="endGameModalCloseBtn" class="modal-close-btn" type="button" aria-label="Fechar confirmacao">x</button>
+        </div>
+        <p>Tem certeza que deseja encerrar a partida e voltar ao lobby?</p>
+        <div class="actions-row top-gap">
+          <button id="endGameModalCancelBtn" type="button">Cancelar</button>
+          <button id="endGameModalConfirmBtn" class="danger" type="button">Encerrar</button>
+        </div>
       </div>
     </div>
 
