@@ -1,5 +1,7 @@
 /* Board: estilos da matriz 5x5, cabecalhos e estados das coordenadas. */
 .matrix-wrap {
+  width: fit-content;
+  max-width: 100%;
   overflow-x: auto;
   border: 1px solid var(--play-line);
   border-radius: 12px;

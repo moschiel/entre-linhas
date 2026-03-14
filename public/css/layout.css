@@ -55,10 +55,12 @@
 
 .game-layout {
   display: grid;
-  grid-template-columns: 190px minmax(0, 1fr) 190px;
+  grid-template-columns: 190px max-content 190px;
   grid-template-rows: auto auto;
   gap: 10px;
   align-items: start;
+  width: fit-content;
+  max-width: 100%;
 }
 
 #boardSection,
@@ -76,6 +78,8 @@
 #boardSection {
   position: relative;
   overflow: hidden;
+  width: fit-content;
+  justify-self: start;
 }
 
 #tableSideSection {
