@@ -44,13 +44,8 @@
     return `${slot.name} (${status})`;
   }
 
-  function syncElementVisibility(element, visible) {
-    if (visible) {
-      element.classList.remove("hidden");
-    } else {
-      element.classList.add("hidden");
-    }
-    element.disabled = !visible;
+  function setVisibility(element, visible) {
+    element.classList.toggle("hidden", !visible);
   }
 
   function renderDeckPileVisual(container, pileCount) {
@@ -152,8 +147,6 @@
     if (!shouldShow) {
       dom.matrixHeadRow.innerHTML = '<th class="corner-cell">-</th>';
       dom.matrixBody.innerHTML = "";
-      gameState.selectedBoardCoord = null;
-      dom.selectedCoord.textContent = "nenhuma";
       return;
     }
 
@@ -164,12 +157,6 @@
     (game.boardPlacements || []).forEach((placement) => {
       placements[placement.coord] = placement;
     });
-
-    if (gameState.selectedBoardCoord && !placements[gameState.selectedBoardCoord]) {
-      gameState.selectedBoardCoord = null;
-    }
-
-    dom.selectedCoord.textContent = gameState.selectedBoardCoord || "nenhuma";
 
     const headCells = ['<th class="corner-cell">-</th>'];
     cols.forEach((col) => {
@@ -196,9 +183,8 @@
               return `<td class="coord-cell${hoverClass}" data-coord="${coord}"><div class="coord-slot-label">${coord}</div></td>`;
             }
 
-            const selectedClass = gameState.selectedBoardCoord === coord ? " selected" : "";
             const movableClass = game.phase === "in_game" ? " movable" : "";
-            return `<td class="coord-cell filled${selectedClass}${hoverClass}" data-coord="${coord}">
+            return `<td class="coord-cell filled${hoverClass}" data-coord="${coord}">
               <div class="board-card board-card-faceup${movableClass}" data-card-coord="${placed.cardCoord || placed.coord}">
                 <div class="board-card-coord">${placed.cardCoord || placed.coord}</div>
               </div>
@@ -212,22 +198,6 @@
       .join("");
 
     dom.matrixBody.innerHTML = bodyRows;
-
-    if (gameState.isHost()) {
-      dom.matrixBody.querySelectorAll(".coord-cell.filled").forEach((cell) => {
-        cell.addEventListener("click", () => {
-          if (cell.dataset.coord === gameState.selectedBoardCoord) {
-            gameState.selectedBoardCoord = null;
-          } else {
-            gameState.selectedBoardCoord = cell.dataset.coord || null;
-          }
-
-          dom.selectedCoord.textContent = gameState.selectedBoardCoord || "nenhuma";
-          renderBoard(dom, gameState, game);
-          renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
-        });
-      });
-    }
   }
 
   function renderDeck(dom, gameState, game, fullState) {
@@ -242,7 +212,6 @@
     const cardVisuals = getCardVisualElements(dom);
     const cardLabels = getCardLabelElements(dom);
 
-    dom.deckSection.classList.toggle("hidden", !inGame);
     dom.tableLeftPlayersSection.classList.toggle("hidden", !hasActiveRound);
     dom.tableRightPlayersSection.classList.toggle("hidden", !hasActiveRound);
     dom.tableSideSection.classList.toggle("hidden", !hasActiveRound);
@@ -250,7 +219,6 @@
     if (!hasActiveRound) {
       gameState.drawFlightsByRole = {};
       dom.deckPileCountLabel.textContent = "0";
-      dom.myCardValue.textContent = "nenhuma";
       PLAYER_ROLE_ORDER.forEach((role) => {
         const visual = cardVisuals[role];
         if (!visual) {
@@ -261,13 +229,10 @@
       });
       renderDeckPileVisual(dom.deckPileVisual, 0);
       renderDeckPileVisual(dom.discardPileVisual, 0);
-      syncElementVisibility(dom.drawCardBtn, false);
-      syncElementVisibility(dom.placeCardBtn, false);
-      syncElementVisibility(dom.discardCardBtn, false);
-      syncElementVisibility(dom.invalidateCardBtn, false);
-      dom.drawHint.textContent = "Saque manual: nao existe ordem de turno.";
-      dom.discardSection.classList.add("hidden");
+      setVisibility(dom.discardHistoryBtn, false);
+      setVisibility(dom.discardHistoryModal, false);
       dom.discardList.innerHTML = "";
+      dom.discardHistoryHint.textContent = "Detalhes das cartas descartadas ficam ocultos durante a partida.";
       dom.summarySection.classList.add("hidden");
       dom.summaryRating.textContent = "-";
       dom.summaryCorrect.textContent = "0";
@@ -279,12 +244,16 @@
     const hasPrivateCard = Boolean(gameState.myPrivateCard);
     const hasCard = hasPrivateCard && !gameState.drawFlightInProgress;
     const myCardVisible = hasCard && !gameState.dragState.active && !gameState.placingCardInProgress;
-    dom.myCardValue.textContent = myCardVisible ? gameState.myPrivateCard.coord : "nenhuma";
     const pileCount = Number(game.drawPileCount || 0);
     const discardedCount = Number(game.discardPileCount || 0);
     renderDeckPileVisual(dom.deckPileVisual, pileCount);
     renderDeckPileVisual(dom.discardPileVisual, discardedCount);
     dom.discardPileVisual.classList.toggle("drag-hover", Boolean(gameState.dragState.hoverDiscard));
+    const isHost = gameState.isHost();
+    setVisibility(dom.discardHistoryBtn, isHost);
+    if (!isHost) {
+      setVisibility(dom.discardHistoryModal, false);
+    }
 
     PLAYER_ROLE_ORDER.forEach((role) => {
       const visual = cardVisuals[role];
@@ -329,22 +298,19 @@
     const canDraw = pileCount > 0 && !hasCard && !gameState.dragState.active && !gameState.placingCardInProgress;
     dom.deckPileVisual.classList.toggle("can-draw", canDraw);
 
-    syncElementVisibility(dom.drawCardBtn, false);
-    syncElementVisibility(dom.placeCardBtn, false);
-    syncElementVisibility(dom.discardCardBtn, false);
-    syncElementVisibility(dom.invalidateCardBtn, gameState.isHost() && Boolean(gameState.selectedBoardCoord));
-
     const discardedCountForList = game.discardPileCount || 0;
     const isEnded = ended;
     const discardActivity = game.discardActivity || [];
-    dom.discardSection.classList.remove("hidden");
     if (!isEnded && discardedCountForList === 0) {
       dom.discardList.innerHTML = "<li>Nenhuma carta descartada ainda.</li>";
+      dom.discardHistoryHint.textContent = "Detalhes das cartas descartadas ficam ocultos durante a partida.";
     } else if (!isEnded) {
+      dom.discardHistoryHint.textContent = "Durante a partida, o historico mostra apenas quem descartou.";
       dom.discardList.innerHTML = discardActivity
         .map((entry) => `<li>${entry.text}</li>`)
         .join("");
     } else {
+      dom.discardHistoryHint.textContent = "Partida encerrada. Valores das cartas descartadas revelados.";
       const finalDiscardPile = (game.finalSummary && game.finalSummary.discardPile) || [];
       if (finalDiscardPile.length === 0) {
         dom.discardList.innerHTML = "<li>Nenhuma carta descartada nesta partida.</li>";
@@ -373,27 +339,6 @@
       dom.summaryDiscarded.textContent = "0";
     }
 
-    if (gameState.placingCardInProgress) {
-      dom.drawHint.textContent = "Colocando carta no tabuleiro...";
-      return;
-    }
-
-    if (gameState.dragState.active) {
-      dom.drawHint.textContent = "Solte sua carta sobre uma celula da matriz.";
-      return;
-    }
-
-    if (hasCard) {
-      dom.drawHint.textContent = "Arraste sua carta atual para uma celula do tabuleiro.";
-      return;
-    }
-
-    if ((game.drawPileCount || 0) === 0) {
-      dom.drawHint.textContent = "A pilha acabou.";
-      return;
-    }
-
-    dom.drawHint.textContent = "Saque quando quiser. Ate 4 jogadores podem sacar em paralelo.";
   }
 
   function renderRoomStatus(dom, state) {

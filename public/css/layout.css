@@ -65,8 +65,6 @@
 #tableLeftPlayersSection,
 #tableRightPlayersSection,
 #tableSideSection,
-#deckSection,
-#discardSection,
 #summarySection {
   background: linear-gradient(180deg, var(--play-surface) 0%, #f5fbf6 100%);
   border-color: var(--play-line);

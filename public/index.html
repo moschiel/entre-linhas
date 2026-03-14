@@ -81,7 +81,10 @@
       <section id="tableSideSection" class="card hidden">
         <div class="table-side-stack">
           <div class="deck-pile-panel discard-pile-panel">
-            <p class="deck-visual-label">Descarte</p>
+            <div class="discard-panel-header">
+              <p class="deck-visual-label">Descarte</p>
+              <button id="discardHistoryBtn" class="discard-history-btn hidden" type="button" aria-label="Abrir historico de descartes">i</button>
+            </div>
             <div id="discardPileVisual" class="deck-pile-visual empty"></div>
           </div>
 
@@ -92,27 +95,6 @@
         </div>
       </section>
       </div>
-
-      <section id="deckSection" class="card hidden">
-        <h2>Cartas</h2>
-        <p><strong>Sua carta atual:</strong> <span id="myCardValue">nenhuma</span></p>
-        <p hidden><strong>Selecionada no tabuleiro:</strong> <span id="selectedCoord">nenhuma</span></p>
-        <div class="actions-row">
-          <button id="drawCardBtn" disabled>Sacar carta</button>
-          <button id="placeCardBtn" disabled>Colocar no tabuleiro</button>
-        </div>
-        <div class="actions-row top-gap">
-          <button id="discardCardBtn" class="danger-soft" disabled>Descartar carta</button>
-          <button id="invalidateCardBtn" class="danger" disabled>Invalidar selecionada</button>
-        </div>
-        <p hidden id="drawHint" class="hint">Saque manual: nao existe ordem de turno.</p>
-      </section>
-
-      <section id="discardSection" class="card hidden">
-        <h2>Descartes</h2>
-        <p class="hint">Detalhes das cartas descartadas ficam ocultos durante a partida.</p>
-        <ul id="discardList" class="discard-list"></ul>
-      </section>
 
       <section id="summarySection" class="card hidden">
         <h2>Resultado final</h2>
@@ -159,6 +141,17 @@
         <p>Ja existem 4 jogadores nessa sessao. Feche este dispositivo.</p>
       </section>
     </main>
+
+    <div id="discardHistoryModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Historico de descartes</h2>
+          <button id="discardHistoryCloseBtn" class="modal-close-btn" type="button" aria-label="Fechar historico">x</button>
+        </div>
+        <p id="discardHistoryHint" class="hint">Detalhes das cartas descartadas ficam ocultos durante a partida.</p>
+        <ul id="discardList" class="discard-list"></ul>
+      </div>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/state.js"></script>

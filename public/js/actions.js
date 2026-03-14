@@ -577,6 +577,24 @@
       socket.emit("game:end");
     });
 
+    dom.discardHistoryBtn.addEventListener("click", () => {
+      if (!gameState.isHost()) {
+        dom.discardHistoryModal.classList.add("hidden");
+        return;
+      }
+      dom.discardHistoryModal.classList.remove("hidden");
+    });
+
+    dom.discardHistoryCloseBtn.addEventListener("click", () => {
+      dom.discardHistoryModal.classList.add("hidden");
+    });
+
+    dom.discardHistoryModal.addEventListener("click", (event) => {
+      if (event.target === dom.discardHistoryModal) {
+        dom.discardHistoryModal.classList.add("hidden");
+      }
+    });
+
     dom.deckPileVisual.addEventListener("click", () => {
       if (!canDrawFromPile()) {
         return;
@@ -593,25 +611,7 @@
       element.addEventListener("pointerdown", startBoardDrag);
     });
 
-    dom.placeCardBtn.addEventListener("click", () => {
-      // Fluxo antigo mantido apenas por compatibilidade visual; o uso real agora e por drag.
-    });
-
     dom.matrixBody.addEventListener("pointerdown", startPlacedCardDrag);
-
-    dom.discardCardBtn.addEventListener("click", () => {});
-
-    dom.invalidateCardBtn.addEventListener("click", () => {
-      if (!gameState.selectedBoardCoord) {
-        return;
-      }
-
-      socket.emit("card:invalidate", gameState.selectedBoardCoord);
-      gameState.selectedBoardCoord = null;
-      dom.selectedCoord.textContent = "nenhuma";
-      render.renderBoard(dom, gameState, gameState.lastGameState);
-      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
-    });
   }
 
   global.EntreLinhasActions = {

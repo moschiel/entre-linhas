@@ -4,7 +4,6 @@
     myPrivateCard: null,
     lastGameState: null,
     lastPublicState: null,
-    selectedBoardCoord: null,
     hoveredBoardCoord: null,
     dragState: {
       active: false,
