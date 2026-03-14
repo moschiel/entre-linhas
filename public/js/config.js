@@ -21,6 +21,8 @@
       mobileDragGhostGap: 28,
       // Duracao da vibracao curta ao iniciar o drag no mobile, em ms.
       mobileDragHapticMs: 22,
+      // Exibe a coordenada no centro das celulas vazias do tabuleiro.
+      showEmptyCellCoords: false,
       // Exibe o nome do jogador sobre a carta ja colocada no tabuleiro.
       showPlacedCardOwner: false,
     },

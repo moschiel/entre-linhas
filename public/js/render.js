@@ -3,6 +3,7 @@
   const config = global.EntreLinhasConfig || {};
   const uiConfig = config.ui || {};
   const BOARD_WORD_SHRINK_THRESHOLD = Number(uiConfig.boardWordShrinkThreshold) || 7;
+  const SHOW_EMPTY_CELL_COORDS = uiConfig.showEmptyCellCoords !== false;
 
   function getWordSizeClass(word) {
     return typeof word === "string" && word.length > BOARD_WORD_SHRINK_THRESHOLD ? " tight" : "";
@@ -223,7 +224,7 @@
               && gameState.dragState.sourceCoord === coord;
 
             if (!placed || isMovingSource) {
-              return `<td class="coord-cell${hoverClass}" data-coord="${coord}"><div class="coord-slot-label">${coord}</div></td>`;
+              return `<td class="coord-cell${hoverClass}" data-coord="${coord}"><div class="coord-slot-label">${SHOW_EMPTY_CELL_COORDS ? coord : ""}</div></td>`;
             }
 
             const movableClass = game.phase === "in_game" ? " movable" : "";
