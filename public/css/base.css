@@ -16,6 +16,8 @@
   --play-line: #b7d0be;
   --play-shadow: rgba(25, 59, 45, 0.14);
   --board-cell-size: 52px;
+  --board-word-font-size: 12px;
+  --board-word-font-size-tight: 10px;
 }
 
 * {

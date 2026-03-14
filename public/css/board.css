@@ -8,7 +8,7 @@
 }
 
 .matrix-table {
-  width: 100%;
+  width: max-content;
   border-collapse: separate;
   border-spacing: 4px;
 }
@@ -18,8 +18,15 @@
   border: none;
   border-radius: 8px;
   text-align: center;
-  padding: 6px;
   vertical-align: middle;
+}
+
+.matrix-table th {
+  padding: 6px;
+}
+
+.matrix-table td {
+  padding: 0;
 }
 
 .matrix-table thead th {
@@ -38,8 +45,15 @@
 
 .col-word {
   margin-top: 4px;
-  font-size: 0.75rem;
+  font-size: var(--board-word-font-size);
   line-height: 1.1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.col-word.tight,
+.row-word.tight {
+  font-size: var(--board-word-font-size-tight);
 }
 
 .row-header {
@@ -56,18 +70,21 @@
 .row-word {
   display: block;
   margin-top: 4px;
-  font-size: 0.75rem;
+  font-size: var(--board-word-font-size);
   line-height: 1.1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .coord-cell {
   position: relative;
-  width: var(--board-cell-size);
+  min-width: var(--board-cell-size);
   height: var(--board-cell-size);
   font-size: 0.75rem;
   color: var(--muted);
   background: #fffdf8;
   border: 1px solid #dae6dc;
+  overflow: visible;
 }
 
 .coord-cell.filled {
@@ -90,14 +107,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  width: var(--board-cell-size);
+  height: var(--board-cell-size);
+  margin: 0 auto;
 }
 
 .board-card {
   box-sizing: border-box;
-  width: 100%;
-  height: 100%;
+  width: var(--board-cell-size);
+  height: var(--board-cell-size);
   border-radius: 7px;
   display: flex;
   align-items: center;
@@ -107,6 +125,7 @@
   font-size: 0.92rem;
   line-height: 1;
   letter-spacing: 0.9px;
+  margin: 0 auto;
 }
 
 .board-card-faceup {

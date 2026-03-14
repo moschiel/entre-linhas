@@ -2,6 +2,11 @@
   const PLAYER_ROLE_ORDER = ["host", "guest", "player3", "player4"];
   const config = global.EntreLinhasConfig || {};
   const uiConfig = config.ui || {};
+  const BOARD_WORD_SHRINK_THRESHOLD = Number(uiConfig.boardWordShrinkThreshold) || 7;
+
+  function getWordSizeClass(word) {
+    return typeof word === "string" && word.length > BOARD_WORD_SHRINK_THRESHOLD ? " tight" : "";
+  }
 
   function getPlayerStatusElements(dom) {
     return {
@@ -168,14 +173,16 @@
 
     const headCells = ['<th class="corner-cell">-</th>'];
     cols.forEach((col) => {
+      const wordSizeClass = getWordSizeClass(col.word);
       headCells.push(
-        `<th><div class="col-key">${col.key}</div><div class="col-word">${col.word}</div></th>`,
+        `<th><div class="col-key">${col.key}</div><div class="col-word${wordSizeClass}">${col.word}</div></th>`,
       );
     });
     dom.matrixHeadRow.innerHTML = headCells.join("");
 
     const bodyRows = rows
       .map((row) => {
+        const rowWordSizeClass = getWordSizeClass(row.word);
         const cells = cols
           .map((col) => {
             const coord = `${row.key}${col.key}`;
@@ -196,7 +203,7 @@
           })
           .join("");
 
-        return `<tr><th class="row-header"><span class="row-key">${row.key}</span><span class="row-word">${row.word}</span></th>${cells}</tr>`;
+        return `<tr><th class="row-header"><span class="row-key">${row.key}</span><span class="row-word${rowWordSizeClass}">${row.word}</span></th>${cells}</tr>`;
       })
       .join("");
 

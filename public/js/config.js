@@ -1,6 +1,14 @@
 (function initConfigModule(global) {
   const config = {
     ui: {
+      // Lado do quadrado das cartas e das celulas da matriz.
+      boardCellSize: 52,
+      // Fonte normal das palavras de linha/coluna do tabuleiro, em px.
+      boardWordFontSize: 12,
+      // Fonte reduzida para palavras que passam do limite configurado, em px.
+      boardWordFontSizeTight: 10,
+      // Se a palavra passar deste numero de caracteres, usa a fonte reduzida.
+      boardWordShrinkThreshold: 7,
       // Duracao principal da animacao de saque (voo + flip), em milissegundos.
       drawAnimationMs: 2000,
       // Margem de seguranca somada ao timeout final (caso transitionend atrase/falhe).
