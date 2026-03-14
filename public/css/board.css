@@ -135,6 +135,11 @@
   color: #1f5c40;
 }
 
+.board-card.movable {
+  cursor: grab;
+  touch-action: none;
+}
+
 .board-card-coord {
   pointer-events: none;
 }

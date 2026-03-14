@@ -10,6 +10,7 @@
       active: false,
       pointerId: null,
       hoverCoord: null,
+      hoverDiscard: false,
       sourceType: null,
       sourceCoord: null,
     },

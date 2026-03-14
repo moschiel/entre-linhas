@@ -197,7 +197,7 @@
             }
 
             const selectedClass = gameState.selectedBoardCoord === coord ? " selected" : "";
-            const movableClass = placed.placedByRole === gameState.myRoleValue && game.phase === "in_game" ? " movable" : "";
+            const movableClass = game.phase === "in_game" ? " movable" : "";
             return `<td class="coord-cell filled${selectedClass}${hoverClass}" data-coord="${coord}">
               <div class="board-card board-card-faceup${movableClass}" data-card-coord="${placed.cardCoord || placed.coord}">
                 <div class="board-card-coord">${placed.cardCoord || placed.coord}</div>
@@ -284,6 +284,7 @@
     const discardedCount = Number(game.discardPileCount || 0);
     renderDeckPileVisual(dom.deckPileVisual, pileCount);
     renderDeckPileVisual(dom.discardPileVisual, discardedCount);
+    dom.discardPileVisual.classList.toggle("drag-hover", Boolean(gameState.dragState.hoverDiscard));
 
     PLAYER_ROLE_ORDER.forEach((role) => {
       const visual = cardVisuals[role];
@@ -330,7 +331,7 @@
 
     syncElementVisibility(dom.drawCardBtn, false);
     syncElementVisibility(dom.placeCardBtn, false);
-    syncElementVisibility(dom.discardCardBtn, hasCard && !gameState.dragState.active && !gameState.placingCardInProgress);
+    syncElementVisibility(dom.discardCardBtn, false);
     syncElementVisibility(dom.invalidateCardBtn, gameState.isHost() && Boolean(gameState.selectedBoardCoord));
 
     const discardedCountForList = game.discardPileCount || 0;

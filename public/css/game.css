@@ -84,6 +84,13 @@
   filter: saturate(1.05);
 }
 
+.deck-pile-visual.drag-hover {
+  transform: translateY(-1px);
+  filter: saturate(1.06);
+  outline: 2px solid #5fa07e;
+  outline-offset: 4px;
+}
+
 .deck-current-visual {
   box-sizing: border-box;
   width: var(--board-cell-size);

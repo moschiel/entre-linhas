@@ -10,6 +10,7 @@ const {
   placeCard,
   movePlacedCard,
   discardCard,
+  discardPlacedCard,
   invalidateCard,
   endGame,
 } = require("../../domain/game/rules");
@@ -125,14 +126,20 @@ function registerSocketHandlers(io, sessionState) {
       emitPrivateState(io, sessionState);
     });
 
-    socket.on("card:discard", () => {
+    socket.on("card:discard", (payload) => {
       const requester = getSlotByToken(sessionState, playerToken);
+      const source = payload && typeof payload.source === "string" ? payload.source : "hand";
+      const coord = payload && typeof payload.coord === "string" ? payload.coord.trim().toUpperCase() : "";
 
       if (!requester) {
         return;
       }
 
-      if (!discardCard(sessionState, requester)) {
+      if (source === "board") {
+        if (!discardPlacedCard(sessionState, requester, coord)) {
+          return;
+        }
+      } else if (!discardCard(sessionState, requester)) {
         return;
       }
 

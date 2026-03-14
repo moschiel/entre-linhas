@@ -104,10 +104,6 @@ function movePlacedCard(sessionState, requester, fromCoord, targetCoord) {
     return false;
   }
 
-  if (placement.placedByRole !== requester.role) {
-    return false;
-  }
-
   if (sessionState.game.boardPlacements[target]) {
     return false;
   }
@@ -139,6 +135,34 @@ function discardCard(sessionState, requester) {
   });
 
   sessionState.game.hands[requester.role] = null;
+  maybeFinishGame(sessionState);
+  return true;
+}
+
+function discardPlacedCard(sessionState, requester, sourceCoord) {
+  if (sessionState.game.phase !== "in_game") {
+    return false;
+  }
+
+  const coord = typeof sourceCoord === "string" ? sourceCoord.trim().toUpperCase() : "";
+  if (!coord) {
+    return false;
+  }
+
+  const placement = sessionState.game.boardPlacements[coord];
+  if (!placement) {
+    return false;
+  }
+
+  delete sessionState.game.boardPlacements[coord];
+  sessionState.game.discardPile.push({
+    coord: placement.cardCoord || placement.coord,
+    source: "board",
+    discardedByRole: requester.role,
+    discardedByName: requester.name,
+    originallyPlacedByName: placement.placedByName,
+    discardedAt: Date.now(),
+  });
   maybeFinishGame(sessionState);
   return true;
 }
@@ -181,6 +205,7 @@ module.exports = {
   placeCard,
   movePlacedCard,
   discardCard,
+  discardPlacedCard,
   invalidateCard,
   endGame,
 };
