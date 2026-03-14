@@ -44,6 +44,15 @@
     return `${slot.name} (${status})`;
   }
 
+  function getCardPanelElements(dom) {
+    return {
+      host: dom.currentCardPanelHost,
+      guest: dom.currentCardPanelGuest,
+      player3: dom.currentCardPanelPlayer3,
+      player4: dom.currentCardPanelPlayer4,
+    };
+  }
+
   function getEditNameButtonElements(dom) {
     return {
       host: dom.editNameBtnHost,
@@ -244,6 +253,7 @@
       playerByRole[player.role] = player;
     });
     const cardVisuals = getCardVisualElements(dom);
+    const cardPanels = getCardPanelElements(dom);
     const cardLabels = getCardLabelElements(dom);
     const editNameButtons = getEditNameButtonElements(dom);
 
@@ -255,12 +265,16 @@
       dom.deckPileCountLabel.textContent = "0";
       PLAYER_ROLE_ORDER.forEach((role) => {
         const visual = cardVisuals[role];
+        const panel = cardPanels[role];
         const editButton = editNameButtons[role];
         if (!visual) {
           return;
         }
         visual.textContent = "--";
         visual.classList.remove("filled", "facedown");
+        if (panel) {
+          panel.classList.add("hidden");
+        }
         if (editButton) {
           editButton.classList.add("hidden");
         }
@@ -296,6 +310,7 @@
 
     PLAYER_ROLE_ORDER.forEach((role) => {
       const visual = cardVisuals[role];
+      const panel = cardPanels[role];
       const label = cardLabels[role];
       const editButton = editNameButtons[role];
       if (!visual || !label) {
@@ -303,6 +318,10 @@
       }
 
       const player = playerByRole[role];
+      const isOccupied = Boolean(player && player.occupied);
+      if (panel) {
+        panel.classList.toggle("hidden", !isOccupied);
+      }
       if (player && player.occupied) {
         label.textContent = player.online ? player.name : `${player.name} (offline)`;
         label.classList.toggle("player-offline", !player.online);

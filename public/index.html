@@ -38,21 +38,21 @@
       <div id="gameLayout" class="game-layout">
         <section id="tableLeftPlayersSection" class="card hidden">
           <div class="table-current-stack">
-            <div class="deck-current-panel">
+            <div id="currentCardPanelHost" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelHost">Host</p>
                 <button id="editNameBtnHost" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Host">✎</button>
               </div>
               <div id="currentCardHostVisual" class="deck-current-visual">--</div>
             </div>
-            <div class="deck-current-panel">
+            <div id="currentCardPanelPlayer3" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelPlayer3">Jogador 3</p>
                 <button id="editNameBtnPlayer3" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 3">✎</button>
               </div>
               <div id="currentCardPlayer3Visual" class="deck-current-visual">--</div>
             </div>
-            <div class="deck-pile-panel draw-pile-panel">
+            <div id="drawPilePanel" class="deck-pile-panel draw-pile-panel">
               <p class="deck-visual-label">Pilha (<span id="deckPileCountLabel">0</span>)</p>
               <div id="deckPileVisual" class="deck-pile-visual"></div>
             </div>
@@ -74,21 +74,21 @@
 
         <section id="tableRightPlayersSection" class="card hidden">
           <div class="table-current-stack">
-            <div class="deck-current-panel">
+            <div id="currentCardPanelGuest" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelGuest">Convidado</p>
                 <button id="editNameBtnGuest" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Convidado">✎</button>
               </div>
               <div id="currentCardGuestVisual" class="deck-current-visual">--</div>
             </div>
-            <div class="deck-current-panel">
+            <div id="currentCardPanelPlayer4" class="deck-current-panel">
               <div class="player-label-row">
                 <p class="deck-visual-label" id="currentCardLabelPlayer4">Jogador 4</p>
                 <button id="editNameBtnPlayer4" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 4">✎</button>
               </div>
               <div id="currentCardPlayer4Visual" class="deck-current-visual">--</div>
             </div>
-            <div class="deck-pile-panel discard-pile-panel">
+            <div id="discardPilePanel" class="deck-pile-panel discard-pile-panel">
               <div class="discard-panel-header">
                 <p class="deck-visual-label">Descarte</p>
                 <button id="discardHistoryBtn" class="discard-history-btn hidden" type="button" aria-label="Abrir historico de descartes">i</button>
