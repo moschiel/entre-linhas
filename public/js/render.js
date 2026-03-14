@@ -135,6 +135,7 @@
   function renderActionButtons(dom, state, gameState) {
     dom.startGameSection.classList.toggle("hidden", !gameState.isHost());
     const isLobby = !state || !state.game || state.game.phase === "lobby";
+    dom.statusSection.classList.toggle("hidden", !isLobby);
     dom.nameSection.classList.toggle("hidden", !isLobby);
     if (isLobby) {
       dom.editNameModal.classList.add("hidden");
@@ -426,6 +427,42 @@
     dom.roomStatus.style.color = "orange";
   }
 
+  function renderRoomIssueModal(dom, state, gameState) {
+    const game = state && state.game ? state.game : null;
+    const inActiveRound = Boolean(game && (game.phase === "in_game" || game.phase === "ended"));
+    if (!inActiveRound) {
+      dom.roomIssueModal.classList.add("hidden");
+      return;
+    }
+
+    if (gameState.connectionState !== "connected") {
+      dom.roomIssueTitle.textContent = "Conexao interrompida";
+      dom.roomIssueMessage.textContent = "Voce perdeu a conexao com a sala. A partida fica bloqueada ate reconectar.";
+      dom.roomIssueModal.classList.remove("hidden");
+      return;
+    }
+
+    if (game.phase === "in_game" && game.pausedByDisconnect) {
+      const statusContext = gameState.statusContext || {};
+      const disconnectedName = statusContext.disconnectedName;
+      const disconnectedSeat = statusContext.disconnectedSeat;
+      if (disconnectedSeat && statusContext.mySeat && disconnectedSeat === statusContext.mySeat) {
+        dom.roomIssueTitle.textContent = "Reconexao pendente";
+        dom.roomIssueMessage.textContent = "Sua conexao com a partida foi interrompida. Aguarde reconectar para continuar.";
+      } else if (disconnectedName) {
+        dom.roomIssueTitle.textContent = "Partida pausada";
+        dom.roomIssueMessage.textContent = `${disconnectedName} ficou offline. Aguarde a reconexao para continuar a partida.`;
+      } else {
+        dom.roomIssueTitle.textContent = "Partida pausada";
+        dom.roomIssueMessage.textContent = "Um jogador ficou offline. Aguarde a reconexao para continuar a partida.";
+      }
+      dom.roomIssueModal.classList.remove("hidden");
+      return;
+    }
+
+    dom.roomIssueModal.classList.add("hidden");
+  }
+
   function renderPlayers(dom, state) {
     const gamePhase = state && state.game ? state.game.phase : "lobby";
     dom.playersSection.classList.toggle("hidden", gamePhase !== "lobby");
@@ -460,6 +497,7 @@
     renderBoard,
     renderDeck,
     renderPlayers,
+    renderRoomIssueModal,
     renderRoomStatus,
   };
 })(window);

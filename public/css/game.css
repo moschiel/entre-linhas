@@ -227,6 +227,10 @@
   padding: 16px;
 }
 
+.modal-card-compact {
+  width: min(420px, 100%);
+}
+
 .modal-header {
   display: flex;
   align-items: center;

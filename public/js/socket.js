@@ -66,7 +66,12 @@
   function bindSocketEvents(socket, deps) {
     const { dom, gameState, storage, render } = deps;
 
+    function renderIssueModal() {
+      render.renderRoomIssueModal(dom, gameState.lastPublicState, gameState);
+    }
+
     dom.connectionStatus.textContent = "Conectando...";
+    gameState.connectionState = "connecting";
 
     socket.on("session:assigned", (payload) => {
       gameState.mySystemRole = payload.systemRole;
@@ -86,6 +91,8 @@
 
       dom.connectionStatus.textContent = "Conectado";
       dom.connectionStatus.style.color = "green";
+      gameState.connectionState = "connected";
+      renderIssueModal();
     });
 
     socket.on("state:update", (state) => {
@@ -113,16 +120,18 @@
       gameState.lastPublicState = normalizedState;
       gameState.lastGameState = normalizedState.game || null;
       const disconnectedPlayer = (normalizedState.players || []).find((player) => player.occupied && !player.online) || null;
-      render.renderPlayers(dom, normalizedState);
-      render.renderGameStatus(dom, normalizedState.game, {
+      gameState.statusContext = {
         disconnectedSeat: disconnectedPlayer ? disconnectedPlayer.seat : null,
         disconnectedName: disconnectedPlayer ? disconnectedPlayer.name : null,
         mySeat: gameState.mySeatValue,
-      });
+      };
+      render.renderPlayers(dom, normalizedState);
+      render.renderGameStatus(dom, normalizedState.game, gameState.statusContext);
       render.renderActionButtons(dom, normalizedState, gameState);
       render.renderBoard(dom, gameState, normalizedState.game);
       render.renderDeck(dom, gameState, normalizedState.game, normalizedState);
       render.renderRoomStatus(dom, normalizedState);
+      renderIssueModal();
     });
 
     socket.on("session:full", () => {
@@ -137,21 +146,29 @@
     socket.on("connect_error", () => {
       dom.connectionStatus.textContent = "Falha de conexao";
       dom.connectionStatus.style.color = "red";
+      gameState.connectionState = "error";
+      renderIssueModal();
     });
 
     socket.on("disconnect", () => {
       dom.connectionStatus.textContent = "Desconectado - tentando reconectar";
       dom.connectionStatus.style.color = "orange";
+      gameState.connectionState = "disconnected";
+      renderIssueModal();
     });
 
     socket.io.on("reconnect_attempt", () => {
       dom.connectionStatus.textContent = "Reconectando...";
       dom.connectionStatus.style.color = "orange";
+      gameState.connectionState = "reconnecting";
+      renderIssueModal();
     });
 
     socket.io.on("reconnect", () => {
       dom.connectionStatus.textContent = "Reconectado";
       dom.connectionStatus.style.color = "green";
+      gameState.connectionState = "connected";
+      renderIssueModal();
     });
 
     socket.on("state:private", (state) => {

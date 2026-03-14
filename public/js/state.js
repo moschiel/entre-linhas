@@ -2,6 +2,8 @@
   const state = {
     mySeatValue: null,
     mySystemRole: null,
+    connectionState: "connecting",
+    statusContext: null,
     myPrivateCard: null,
     lastGameState: null,
     lastPublicState: null,

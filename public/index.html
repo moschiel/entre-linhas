@@ -19,7 +19,7 @@
       <h1>Entre Linhas</h1>
       <!-- <p class="subtitle">Etapa 3: matriz 5x5 com palavras sorteadas</p> -->
 
-      <section class="card">
+      <section id="statusSection" class="card">
         <p><strong>Seu papel:</strong> <span id="myRole">Conectando...</span></p>
         <p><strong>Status da sala:</strong> <span id="roomStatus">Aguardando</span></p>
         <p><strong>Status do jogo:</strong> <span id="gameStatus">Lobby</span></p>
@@ -166,6 +166,15 @@
           <input id="editNameInput" type="text" maxlength="20" placeholder="Ex.: Marcos" />
           <button id="editNameSaveBtn" type="button">Salvar</button>
         </div>
+      </div>
+    </div>
+
+    <div id="roomIssueModal" class="modal-overlay hidden">
+      <div class="modal-card modal-card-compact">
+        <div class="modal-header">
+          <h2 id="roomIssueTitle">Status da sala</h2>
+        </div>
+        <p id="roomIssueMessage">Aguardando atualizacao da sala.</p>
       </div>
     </div>
 
