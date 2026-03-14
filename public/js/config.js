@@ -7,6 +7,8 @@
       drawAnimationBufferMs: 100,
       // Tempo que o ghost permanece sobre a carta final antes de sumir (handoff visual).
       drawAnimationHandoffMs: 120,
+      // Exibe o nome do jogador sobre a carta ja colocada no tabuleiro.
+      showPlacedCardOwner: false,
     },
   };
 

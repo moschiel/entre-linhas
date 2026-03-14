@@ -1,5 +1,7 @@
 (function initRenderModule(global) {
   const PLAYER_ROLE_ORDER = ["host", "guest", "player3", "player4"];
+  const config = global.EntreLinhasConfig || {};
+  const uiConfig = config.ui || {};
 
   function getPlayerStatusElements(dom) {
     return {
@@ -189,7 +191,7 @@
               <div class="board-card board-card-faceup">
                 <div class="board-card-coord">${placed.cardCoord || placed.coord}</div>
               </div>
-              <div class="coord-mini">${placed.placedByName}</div>
+              ${uiConfig.showPlacedCardOwner ? `<div class="coord-mini">${placed.placedByName}</div>` : ""}
             </td>`;
           })
           .join("");
