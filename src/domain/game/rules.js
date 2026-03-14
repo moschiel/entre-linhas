@@ -8,7 +8,7 @@ function maybeFinishGame(sessionState) {
     return;
   }
 
-  const noCardsInHands = PLAYER_SLOTS.every((slot) => !sessionState.game.hands[slot.role]);
+  const noCardsInHands = PLAYER_SLOTS.every((slot) => !sessionState.game.hands[slot.slotKey]);
   const pileEmpty = sessionState.game.drawPile.length === 0;
 
   if (!noCardsInHands || !pileEmpty) {
@@ -29,17 +29,17 @@ function startGame(sessionState) {
   sessionState.game.boardPlacements = {};
   sessionState.game.discardPile = [];
   PLAYER_SLOTS.forEach((slot) => {
-    sessionState.game.hands[slot.role] = null;
+    sessionState.game.hands[slot.slotKey] = null;
   });
   sessionState.game.finalSummary = null;
 }
 
-function drawCard(sessionState, role) {
+function drawCard(sessionState, slotKey) {
   if (sessionState.game.phase !== "in_game") {
     return false;
   }
 
-  if (sessionState.game.hands[role]) {
+  if (sessionState.game.hands[slotKey]) {
     return false;
   }
 
@@ -48,7 +48,7 @@ function drawCard(sessionState, role) {
     return false;
   }
 
-  sessionState.game.hands[role] = {
+  sessionState.game.hands[slotKey] = {
     coord: nextCard,
     drawnAt: Date.now(),
   };
@@ -61,7 +61,7 @@ function placeCard(sessionState, requester, targetCoord) {
     return false;
   }
 
-  const card = sessionState.game.hands[requester.role];
+  const card = sessionState.game.hands[requester.slotKey];
   if (!card) {
     return false;
   }
@@ -78,12 +78,13 @@ function placeCard(sessionState, requester, targetCoord) {
   sessionState.game.boardPlacements[coord] = {
     coord,
     cardCoord: card.coord,
-    placedByRole: requester.role,
+    placedBySeat: requester.seat,
+    placedBySystemRole: requester.systemRole,
     placedByName: requester.name,
     placedAt: Date.now(),
   };
 
-  sessionState.game.hands[requester.role] = null;
+  sessionState.game.hands[requester.slotKey] = null;
   maybeFinishGame(sessionState);
   return true;
 }
@@ -121,7 +122,7 @@ function discardCard(sessionState, requester) {
     return false;
   }
 
-  const card = sessionState.game.hands[requester.role];
+  const card = sessionState.game.hands[requester.slotKey];
   if (!card) {
     return false;
   }
@@ -129,12 +130,13 @@ function discardCard(sessionState, requester) {
   sessionState.game.discardPile.push({
     coord: card.coord,
     source: "hand",
-    discardedByRole: requester.role,
+    discardedBySeat: requester.seat,
+    discardedBySystemRole: requester.systemRole,
     discardedByName: requester.name,
     discardedAt: Date.now(),
   });
 
-  sessionState.game.hands[requester.role] = null;
+  sessionState.game.hands[requester.slotKey] = null;
   maybeFinishGame(sessionState);
   return true;
 }
@@ -158,7 +160,8 @@ function discardPlacedCard(sessionState, requester, sourceCoord) {
   sessionState.game.discardPile.push({
     coord: placement.cardCoord || placement.coord,
     source: "board",
-    discardedByRole: requester.role,
+    discardedBySeat: requester.seat,
+    discardedBySystemRole: requester.systemRole,
     discardedByName: requester.name,
     originallyPlacedByName: placement.placedByName,
     discardedAt: Date.now(),
@@ -181,7 +184,8 @@ function invalidateCard(sessionState, requester, safeCoord) {
   sessionState.game.discardPile.push({
     coord: placement.coord,
     source: "board",
-    discardedByRole: requester.role,
+    discardedBySeat: requester.seat,
+    discardedBySystemRole: requester.systemRole,
     discardedByName: requester.name,
     originallyPlacedByName: placement.placedByName,
     discardedAt: Date.now(),

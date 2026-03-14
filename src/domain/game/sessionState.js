@@ -3,14 +3,14 @@ const { PLAYER_SLOTS } = require("../../session/playerSlots");
 function createSessionState() {
   const hands = {};
   PLAYER_SLOTS.forEach((slot) => {
-    hands[slot.role] = null;
+    hands[slot.slotKey] = null;
   });
 
   return {
-    host: null,
-    guest: null,
-    player3: null,
-    player4: null,
+    seat1: null,
+    seat2: null,
+    seat3: null,
+    seat4: null,
     game: {
       phase: "lobby",
       startedAt: null,
@@ -34,7 +34,7 @@ function resetGameToLobby(sessionState) {
   sessionState.game.boardPlacements = {};
   sessionState.game.discardPile = [];
   PLAYER_SLOTS.forEach((slot) => {
-    sessionState.game.hands[slot.role] = null;
+    sessionState.game.hands[slot.slotKey] = null;
   });
   sessionState.game.finalSummary = null;
 }

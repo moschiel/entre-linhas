@@ -47,10 +47,13 @@ function registerSocketHandlers(io, sessionState) {
     }
 
     socket.data.playerToken = playerToken;
-    socket.data.role = slot.role;
+    socket.data.slotKey = slot.slotKey;
+    socket.data.systemRole = slot.systemRole;
+    socket.data.seat = slot.seat;
 
     socket.emit("session:assigned", {
-      role: slot.role,
+      systemRole: slot.systemRole,
+      seat: slot.seat,
       name: slot.name,
     });
 
@@ -75,7 +78,7 @@ function registerSocketHandlers(io, sessionState) {
       const connectedSlots = assignedSlots.filter((slotItem) => slotItem.online);
       const canStartByPlayers = connectedSlots.length >= 2;
 
-      if (!requester || requester.role !== "host") {
+      if (!requester || requester.systemRole !== "host") {
         return;
       }
 
@@ -99,12 +102,12 @@ function registerSocketHandlers(io, sessionState) {
         return;
       }
 
-      if (!drawCard(sessionState, requester.role)) {
+      if (!drawCard(sessionState, requester.slotKey)) {
         return;
       }
 
       io.emit("card:drawn", {
-        role: requester.role,
+        seat: requester.seat,
       });
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
@@ -172,7 +175,7 @@ function registerSocketHandlers(io, sessionState) {
         return;
       }
 
-      if (requester.role !== "host") {
+      if (requester.systemRole !== "host") {
         return;
       }
 
@@ -187,7 +190,7 @@ function registerSocketHandlers(io, sessionState) {
     socket.on("game:end", () => {
       const requester = getSlotByToken(sessionState, playerToken);
 
-      if (!requester || requester.role !== "host") {
+      if (!requester || requester.systemRole !== "host") {
         return;
       }
 

@@ -6,13 +6,13 @@ function emitState(io, sessionState) {
 }
 
 function emitPrivateState(io, sessionState) {
-  PLAYER_SLOTS.map((slotDef) => sessionState[slotDef.role]).forEach((slot) => {
+  PLAYER_SLOTS.map((slotDef) => sessionState[slotDef.slotKey]).forEach((slot) => {
     if (!slot || !slot.socketId) {
       return;
     }
 
     io.to(slot.socketId).emit("state:private", {
-      myCard: sessionState.game.hands[slot.role],
+      myCard: sessionState.game.hands[slot.slotKey],
     });
   });
 }

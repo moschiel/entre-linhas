@@ -1,9 +1,9 @@
 (function initSocketModule(global) {
   const DEFAULT_PLAYER_SLOTS = [
-    { role: "host", defaultName: "Host" },
-    { role: "guest", defaultName: "Convidado" },
-    { role: "player3", defaultName: "Jogador 3" },
-    { role: "player4", defaultName: "Jogador 4" },
+    { slotKey: "seat1", seat: 1, systemRole: "host", defaultName: "Host" },
+    { slotKey: "seat2", seat: 2, systemRole: "guest", defaultName: "Convidado" },
+    { slotKey: "seat3", seat: 3, systemRole: "guest", defaultName: "Jogador 3" },
+    { slotKey: "seat4", seat: 4, systemRole: "guest", defaultName: "Jogador 4" },
   ];
 
   function normalizeState(rawState) {
@@ -13,14 +13,18 @@
 
     if (!players) {
       const legacyByRole = {
-        host: state.host || null,
-        guest: state.guest || null,
+        seat1: state.seat1 || state.host || null,
+        seat2: state.seat2 || state.guest || null,
+        seat3: state.seat3 || null,
+        seat4: state.seat4 || null,
       };
 
       players = DEFAULT_PLAYER_SLOTS.map((slotDef) => {
-        const legacy = legacyByRole[slotDef.role];
+        const legacy = legacyByRole[slotDef.slotKey];
         return {
-          role: slotDef.role,
+          slotKey: slotDef.slotKey,
+          seat: slotDef.seat,
+          systemRole: slotDef.systemRole,
           defaultName: slotDef.defaultName,
           name: legacy && legacy.name ? legacy.name : slotDef.defaultName,
           online: Boolean(legacy && legacy.online),
@@ -65,8 +69,9 @@
     dom.connectionStatus.textContent = "Conectando...";
 
     socket.on("session:assigned", (payload) => {
-      gameState.myRoleValue = payload.role;
-      const roleLabel = payload.role === "host" ? "Host" : "Convidado";
+      gameState.mySystemRole = payload.systemRole;
+      gameState.mySeatValue = payload.seat;
+      const roleLabel = payload.systemRole === "host" ? "Host" : "Convidado";
       dom.myRole.textContent = roleLabel;
 
       if (dom.nameInput.value.trim().length === 0) {
@@ -86,33 +91,33 @@
     socket.on("state:update", (state) => {
       const normalizedState = normalizeState(state);
       gameState.placingCardInProgress = false;
-      const nextRoleHasCardMap = {};
+      const nextSeatHasCardMap = {};
       (normalizedState.players || []).forEach((player) => {
-        nextRoleHasCardMap[player.role] = Boolean(player.hasCard);
+        nextSeatHasCardMap[player.seat] = Boolean(player.hasCard);
       });
-      const previousRoleHasCardMap = gameState.roleHasCardMap || {};
+      const previousSeatHasCardMap = gameState.seatHasCardMap || {};
 
       (normalizedState.players || []).forEach((player) => {
-        const hadCard = Boolean(previousRoleHasCardMap[player.role]);
+        const hadCard = Boolean(previousSeatHasCardMap[player.seat]);
         const hasCardNow = Boolean(player.hasCard);
         if (!hadCard && hasCardNow) {
           window.dispatchEvent(new CustomEvent("entrelinhas:card-drawn", {
             detail: {
-              role: player.role,
+              seat: player.seat,
             },
           }));
         }
       });
 
-      gameState.roleHasCardMap = nextRoleHasCardMap;
+      gameState.seatHasCardMap = nextSeatHasCardMap;
       gameState.lastPublicState = normalizedState;
       gameState.lastGameState = normalizedState.game || null;
       const disconnectedPlayer = (normalizedState.players || []).find((player) => player.occupied && !player.online) || null;
       render.renderPlayers(dom, normalizedState);
       render.renderGameStatus(dom, normalizedState.game, {
-        disconnectedRole: disconnectedPlayer ? disconnectedPlayer.role : null,
+        disconnectedSeat: disconnectedPlayer ? disconnectedPlayer.seat : null,
         disconnectedName: disconnectedPlayer ? disconnectedPlayer.name : null,
-        myRole: gameState.myRoleValue,
+        mySeat: gameState.mySeatValue,
       });
       render.renderActionButtons(dom, normalizedState, gameState);
       render.renderBoard(dom, gameState, normalizedState.game);
@@ -160,14 +165,14 @@
     });
 
     socket.on("card:drawn", (payload) => {
-      const role = payload && typeof payload.role === "string" ? payload.role : null;
-      if (!role) {
+      const seat = payload && Number.isFinite(payload.seat) ? payload.seat : null;
+      if (!seat) {
         return;
       }
 
       window.dispatchEvent(new CustomEvent("entrelinhas:card-drawn", {
         detail: {
-          role,
+          seat,
         },
       }));
     });

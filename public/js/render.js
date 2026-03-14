@@ -1,5 +1,5 @@
 (function initRenderModule(global) {
-  const PLAYER_ROLE_ORDER = ["host", "guest", "player3", "player4"];
+  const PLAYER_SEAT_ORDER = [1, 2, 3, 4];
   const config = global.EntreLinhasConfig || {};
   const uiConfig = config.ui || {};
   const BOARD_WORD_SHRINK_THRESHOLD = Number(uiConfig.boardWordShrinkThreshold) || 7;
@@ -10,28 +10,28 @@
 
   function getPlayerStatusElements(dom) {
     return {
-      host: dom.playerStateHost,
-      guest: dom.playerStateGuest,
-      player3: dom.playerStatePlayer3,
-      player4: dom.playerStatePlayer4,
+      1: dom.playerStateHost,
+      2: dom.playerStateGuest,
+      3: dom.playerStatePlayer3,
+      4: dom.playerStatePlayer4,
     };
   }
 
   function getCardLabelElements(dom) {
     return {
-      host: dom.currentCardLabelHost,
-      guest: dom.currentCardLabelGuest,
-      player3: dom.currentCardLabelPlayer3,
-      player4: dom.currentCardLabelPlayer4,
+      1: dom.currentCardLabelHost,
+      2: dom.currentCardLabelGuest,
+      3: dom.currentCardLabelPlayer3,
+      4: dom.currentCardLabelPlayer4,
     };
   }
 
   function getCardVisualElements(dom) {
     return {
-      host: dom.currentCardHostVisual,
-      guest: dom.currentCardGuestVisual,
-      player3: dom.currentCardPlayer3Visual,
-      player4: dom.currentCardPlayer4Visual,
+      1: dom.currentCardHostVisual,
+      2: dom.currentCardGuestVisual,
+      3: dom.currentCardPlayer3Visual,
+      4: dom.currentCardPlayer4Visual,
     };
   }
 
@@ -46,19 +46,19 @@
 
   function getCardPanelElements(dom) {
     return {
-      host: dom.currentCardPanelHost,
-      guest: dom.currentCardPanelGuest,
-      player3: dom.currentCardPanelPlayer3,
-      player4: dom.currentCardPanelPlayer4,
+      1: dom.currentCardPanelHost,
+      2: dom.currentCardPanelGuest,
+      3: dom.currentCardPanelPlayer3,
+      4: dom.currentCardPanelPlayer4,
     };
   }
 
   function getEditNameButtonElements(dom) {
     return {
-      host: dom.editNameBtnHost,
-      guest: dom.editNameBtnGuest,
-      player3: dom.editNameBtnPlayer3,
-      player4: dom.editNameBtnPlayer4,
+      1: dom.editNameBtnHost,
+      2: dom.editNameBtnGuest,
+      3: dom.editNameBtnPlayer3,
+      4: dom.editNameBtnPlayer4,
     };
   }
 
@@ -106,15 +106,15 @@
     }
 
     if (game.phase === "in_game") {
-      const disconnectedRole = statusContext && statusContext.disconnectedRole;
+      const disconnectedSeat = statusContext && statusContext.disconnectedSeat;
       const disconnectedName = statusContext && statusContext.disconnectedName;
-      const myRole = statusContext && statusContext.myRole;
+      const mySeat = statusContext && statusContext.mySeat;
 
-      if (game.pausedByDisconnect && disconnectedRole && myRole && disconnectedRole === myRole) {
+      if (game.pausedByDisconnect && disconnectedSeat && mySeat && disconnectedSeat === mySeat) {
         dom.gameStatus.textContent = "Em jogo: aguardando reconexao";
       } else if (game.pausedByDisconnect && disconnectedName) {
         dom.gameStatus.textContent = `Em jogo: aguardando ${disconnectedName} se reconectar`;
-      } else if (game.pausedByDisconnect && disconnectedRole) {
+      } else if (game.pausedByDisconnect && disconnectedSeat) {
         dom.gameStatus.textContent = "Em jogo: aguardando jogador se reconectar";
       } else {
         dom.gameStatus.textContent = game.pausedByDisconnect ? "Em jogo (pausado por desconexao)" : "Em jogo";
@@ -248,9 +248,9 @@
     const ended = Boolean(game && game.phase === "ended");
     const hasActiveRound = inGame || ended;
     const players = fullState && Array.isArray(fullState.players) ? fullState.players : [];
-    const playerByRole = {};
+    const playerBySeat = {};
     players.forEach((player) => {
-      playerByRole[player.role] = player;
+      playerBySeat[player.seat] = player;
     });
     const cardVisuals = getCardVisualElements(dom);
     const cardPanels = getCardPanelElements(dom);
@@ -261,12 +261,12 @@
     dom.tableRightPlayersSection.classList.toggle("hidden", !hasActiveRound);
 
     if (!hasActiveRound) {
-      gameState.drawFlightsByRole = {};
+      gameState.drawFlightsBySeat = {};
       dom.deckPileCountLabel.textContent = "0";
-      PLAYER_ROLE_ORDER.forEach((role) => {
-        const visual = cardVisuals[role];
-        const panel = cardPanels[role];
-        const editButton = editNameButtons[role];
+      PLAYER_SEAT_ORDER.forEach((seat) => {
+        const visual = cardVisuals[seat];
+        const panel = cardPanels[seat];
+        const editButton = editNameButtons[seat];
         if (!visual) {
           return;
         }
@@ -308,16 +308,16 @@
       setVisibility(dom.discardHistoryModal, false);
     }
 
-    PLAYER_ROLE_ORDER.forEach((role) => {
-      const visual = cardVisuals[role];
-      const panel = cardPanels[role];
-      const label = cardLabels[role];
-      const editButton = editNameButtons[role];
+    PLAYER_SEAT_ORDER.forEach((seat) => {
+      const visual = cardVisuals[seat];
+      const panel = cardPanels[seat];
+      const label = cardLabels[seat];
+      const editButton = editNameButtons[seat];
       if (!visual || !label) {
         return;
       }
 
-      const player = playerByRole[role];
+      const player = playerBySeat[seat];
       const isOccupied = Boolean(player && player.occupied);
       if (panel) {
         panel.classList.toggle("hidden", !isOccupied);
@@ -326,17 +326,17 @@
         label.textContent = player.online ? player.name : `${player.name} (offline)`;
         label.classList.toggle("player-offline", !player.online);
       } else {
-        label.textContent = player ? player.defaultName : role;
+        label.textContent = player ? player.defaultName : `Jogador ${seat}`;
         label.classList.remove("player-offline");
       }
 
-      const isMe = role === gameState.myRoleValue;
+      const isMe = seat === gameState.mySeatValue;
       if (editButton) {
         editButton.classList.toggle("hidden", !isMe);
       }
       const roleHasCard = Boolean(player && player.hasCard);
       const shouldShowMyCard = isMe && myCardVisible;
-      const roleFlightInProgress = Boolean(gameState.drawFlightsByRole && gameState.drawFlightsByRole[role]);
+      const roleFlightInProgress = Boolean(gameState.drawFlightsBySeat && gameState.drawFlightsBySeat[seat]);
       visual.classList.remove("facedown");
 
       if (roleFlightInProgress) {
@@ -431,19 +431,19 @@
     dom.playersSection.classList.toggle("hidden", gamePhase !== "lobby");
 
     const players = state && Array.isArray(state.players) ? state.players : [];
-    const playerByRole = {};
+    const playerBySeat = {};
     players.forEach((player) => {
-      playerByRole[player.role] = player;
+      playerBySeat[player.seat] = player;
     });
 
     const statusElements = getPlayerStatusElements(dom);
-    PLAYER_ROLE_ORDER.forEach((role) => {
-      const target = statusElements[role];
+    PLAYER_SEAT_ORDER.forEach((seat) => {
+      const target = statusElements[seat];
       if (!target) {
         return;
       }
 
-      const player = playerByRole[role];
+      const player = playerBySeat[seat];
       if (!player || !player.occupied) {
         target.textContent = "vazio";
         return;

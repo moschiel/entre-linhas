@@ -26,7 +26,7 @@
 
     function openEditNameModal() {
       const players = (gameState.lastPublicState && gameState.lastPublicState.players) || [];
-      const myPlayer = players.find((player) => player.role === gameState.myRoleValue);
+      const myPlayer = players.find((player) => player.seat === gameState.mySeatValue);
       dom.editNameInput.value = myPlayer && myPlayer.name ? myPlayer.name : dom.nameInput.value.trim();
       dom.editNameModal.classList.remove("hidden");
       dom.editNameInput.focus();
@@ -37,17 +37,17 @@
       dom.editNameModal.classList.add("hidden");
     }
 
-    function getCardVisualByRole(role) {
-      if (role === "host") {
+    function getCardVisualBySeat(seat) {
+      if (seat === 1) {
         return dom.currentCardHostVisual;
       }
-      if (role === "guest") {
+      if (seat === 2) {
         return dom.currentCardGuestVisual;
       }
-      if (role === "player3") {
+      if (seat === 3) {
         return dom.currentCardPlayer3Visual;
       }
-      if (role === "player4") {
+      if (seat === 4) {
         return dom.currentCardPlayer4Visual;
       }
       return dom.currentCardHostVisual;
@@ -75,7 +75,7 @@
     }
 
     function getMyCardVisual() {
-      return getCardVisualByRole(gameState.myRoleValue);
+      return getCardVisualBySeat(gameState.mySeatValue);
     }
 
     function getBoardCellByPoint(clientX, clientY) {
@@ -421,7 +421,7 @@
       event.preventDefault();
     }
 
-    function animateDrawFlight(role, options) {
+    function animateDrawFlight(seat, options) {
       const drawOptions = options || {};
       const revealForSelf = Boolean(drawOptions.revealForSelf);
       const onDone = typeof drawOptions.onDone === "function" ? drawOptions.onDone : () => {};
@@ -437,7 +437,7 @@
       }
 
       const source = topCard.getBoundingClientRect();
-      const target = getCardVisualByRole(role).getBoundingClientRect();
+      const target = getCardVisualBySeat(seat).getBoundingClientRect();
       const ghost = document.createElement("div");
       ghost.className = "draw-flight-card";
       ghost.innerHTML = `
@@ -551,35 +551,35 @@
     });
 
     window.addEventListener("entrelinhas:card-drawn", (event) => {
-      const role = event && event.detail ? event.detail.role : null;
-      if (!role) {
+      const seat = event && event.detail ? event.detail.seat : null;
+      if (!seat) {
         return;
       }
-      if (gameState.drawFlightsByRole[role]) {
+      if (gameState.drawFlightsBySeat[seat]) {
         return;
       }
 
-      if (role === gameState.myRoleValue) {
+      if (seat === gameState.mySeatValue) {
         gameState.drawFlightInProgress = true;
-        gameState.drawFlightsByRole[role] = true;
+        gameState.drawFlightsBySeat[seat] = true;
         render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
-        animateDrawFlight(role, {
+        animateDrawFlight(seat, {
           revealForSelf: true,
           onDone: () => {
             gameState.drawFlightInProgress = false;
-            gameState.drawFlightsByRole[role] = false;
+            gameState.drawFlightsBySeat[seat] = false;
             render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
           },
         });
         return;
       }
 
-      gameState.drawFlightsByRole[role] = true;
+      gameState.drawFlightsBySeat[seat] = true;
       render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
-      animateDrawFlight(role, {
+      animateDrawFlight(seat, {
         revealForSelf: false,
         onDone: () => {
-          gameState.drawFlightsByRole[role] = false;
+          gameState.drawFlightsBySeat[seat] = false;
           render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
         },
       });

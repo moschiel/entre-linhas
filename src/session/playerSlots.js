@@ -1,12 +1,12 @@
 const PLAYER_SLOTS = [
-  { role: "host", defaultName: "Host" },
-  { role: "guest", defaultName: "Convidado" },
-  { role: "player3", defaultName: "Jogador 3" },
-  { role: "player4", defaultName: "Jogador 4" },
+  { slotKey: "seat1", seat: 1, systemRole: "host", defaultName: "Host" },
+  { slotKey: "seat2", seat: 2, systemRole: "guest", defaultName: "Convidado" },
+  { slotKey: "seat3", seat: 3, systemRole: "guest", defaultName: "Jogador 3" },
+  { slotKey: "seat4", seat: 4, systemRole: "guest", defaultName: "Jogador 4" },
 ];
 
 function getAllSlots(sessionState) {
-  return PLAYER_SLOTS.map((slot) => sessionState[slot.role]).filter(Boolean);
+  return PLAYER_SLOTS.map((slot) => sessionState[slot.slotKey]).filter(Boolean);
 }
 
 function getAssignedSlots(sessionState) {
@@ -20,18 +20,20 @@ function getSlotByToken(sessionState, playerToken) {
 function assignNewSlot(sessionState, playerToken, socketId) {
   for (let i = 0; i < PLAYER_SLOTS.length; i += 1) {
     const slotDef = PLAYER_SLOTS[i];
-    if (sessionState[slotDef.role]) {
+    if (sessionState[slotDef.slotKey]) {
       continue;
     }
 
-    sessionState[slotDef.role] = {
-      role: slotDef.role,
+    sessionState[slotDef.slotKey] = {
+      slotKey: slotDef.slotKey,
+      seat: slotDef.seat,
+      systemRole: slotDef.systemRole,
       playerToken,
       socketId,
       online: true,
       name: slotDef.defaultName,
     };
-    return sessionState[slotDef.role];
+    return sessionState[slotDef.slotKey];
   }
 
   return null;
@@ -43,7 +45,7 @@ function takeOfflineSlot(sessionState, playerToken, socketId) {
     return null;
   }
 
-  const slotDef = PLAYER_SLOTS.find((slot) => slot.role === reusable.role);
+  const slotDef = PLAYER_SLOTS.find((slot) => slot.slotKey === reusable.slotKey);
   reusable.playerToken = playerToken;
   reusable.socketId = socketId;
   reusable.online = true;

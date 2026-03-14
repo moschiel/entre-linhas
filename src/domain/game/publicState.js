@@ -8,14 +8,16 @@ function getPublicState(sessionState) {
   const canStartByPlayers = connectedSlots.length >= 2;
   const game = sessionState.game;
   const players = PLAYER_SLOTS.map((slotDef) => {
-    const slot = sessionState[slotDef.role];
+    const slot = sessionState[slotDef.slotKey];
     return {
-      role: slotDef.role,
+      slotKey: slotDef.slotKey,
+      seat: slotDef.seat,
+      systemRole: slotDef.systemRole,
       defaultName: slotDef.defaultName,
       name: slot ? slot.name : slotDef.defaultName,
       online: Boolean(slot && slot.online),
       occupied: Boolean(slot),
-      hasCard: Boolean(game.hands[slotDef.role]),
+      hasCard: Boolean(game.hands[slotDef.slotKey]),
     };
   });
 

@@ -1,6 +1,7 @@
 (function initStateModule(global) {
   const state = {
-    myRoleValue: null,
+    mySeatValue: null,
+    mySystemRole: null,
     myPrivateCard: null,
     lastGameState: null,
     lastPublicState: null,
@@ -15,10 +16,10 @@
     },
     placingCardInProgress: false,
     drawFlightInProgress: false,
-    drawFlightsByRole: {},
-    roleHasCardMap: {},
+    drawFlightsBySeat: {},
+    seatHasCardMap: {},
     isHost() {
-      return this.myRoleValue === "host";
+      return this.mySystemRole === "host";
     },
   };
 
