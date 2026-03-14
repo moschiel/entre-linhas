@@ -97,16 +97,10 @@
 
 #tableLeftPlayersSection {
   grid-column: 1;
-  grid-row: 1;
-  margin-bottom: 0;
-  /* padding: 10px; */
 }
 
 #tableRightPlayersSection {
   grid-column: 3;
-  grid-row: 1;
-  margin-bottom: 0;
-  /* padding: 10px; */
 }
 
 #tableLeftPlayersSection,
@@ -114,6 +108,10 @@
   background: none;
   border: none;
   box-shadow: none;
+  grid-row: 1;
+  margin-bottom: 0;
+  /* padding: 10px; */
+  padding: 0;
 }
 
 #boardSection::before {
