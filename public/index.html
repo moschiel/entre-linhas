@@ -39,11 +39,17 @@
       <section id="tableLeftPlayersSection" class="card hidden">
         <div class="table-current-stack">
           <div class="deck-current-panel">
-            <p class="deck-visual-label" id="currentCardLabelHost">Host</p>
+            <div class="player-label-row">
+              <p class="deck-visual-label" id="currentCardLabelHost">Host</p>
+              <button id="editNameBtnHost" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Host">✎</button>
+            </div>
             <div id="currentCardHostVisual" class="deck-current-visual">--</div>
           </div>
           <div class="deck-current-panel">
-            <p class="deck-visual-label" id="currentCardLabelGuest">Convidado</p>
+            <div class="player-label-row">
+              <p class="deck-visual-label" id="currentCardLabelGuest">Convidado</p>
+              <button id="editNameBtnGuest" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Convidado">✎</button>
+            </div>
             <div id="currentCardGuestVisual" class="deck-current-visual">--</div>
           </div>
         </div>
@@ -68,11 +74,17 @@
       <section id="tableRightPlayersSection" class="card hidden">
         <div class="table-current-stack">
           <div class="deck-current-panel">
-            <p class="deck-visual-label" id="currentCardLabelPlayer3">Jogador 3</p>
+            <div class="player-label-row">
+              <p class="deck-visual-label" id="currentCardLabelPlayer3">Jogador 3</p>
+              <button id="editNameBtnPlayer3" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 3">✎</button>
+            </div>
             <div id="currentCardPlayer3Visual" class="deck-current-visual">--</div>
           </div>
           <div class="deck-current-panel">
-            <p class="deck-visual-label" id="currentCardLabelPlayer4">Jogador 4</p>
+            <div class="player-label-row">
+              <p class="deck-visual-label" id="currentCardLabelPlayer4">Jogador 4</p>
+              <button id="editNameBtnPlayer4" class="player-name-edit-btn hidden" type="button" aria-label="Editar nome do Jogador 4">✎</button>
+            </div>
             <div id="currentCardPlayer4Visual" class="deck-current-visual">--</div>
           </div>
         </div>
@@ -127,7 +139,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section id="nameSection" class="card">
         <h2>Seu nome</h2>
         <div class="name-row">
           <input id="nameInput" type="text" maxlength="20" placeholder="Ex.: Marcos" />
@@ -150,6 +162,19 @@
         </div>
         <p id="discardHistoryHint" class="hint">Detalhes das cartas descartadas ficam ocultos durante a partida.</p>
         <ul id="discardList" class="discard-list"></ul>
+      </div>
+    </div>
+
+    <div id="editNameModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Editar nome</h2>
+          <button id="editNameCloseBtn" class="modal-close-btn" type="button" aria-label="Fechar edicao de nome">x</button>
+        </div>
+        <div class="name-row modal-name-row">
+          <input id="editNameInput" type="text" maxlength="20" placeholder="Ex.: Marcos" />
+          <button id="editNameSaveBtn" type="button">Salvar</button>
+        </div>
       </div>
     </div>
 

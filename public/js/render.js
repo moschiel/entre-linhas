@@ -44,6 +44,15 @@
     return `${slot.name} (${status})`;
   }
 
+  function getEditNameButtonElements(dom) {
+    return {
+      host: dom.editNameBtnHost,
+      guest: dom.editNameBtnGuest,
+      player3: dom.editNameBtnPlayer3,
+      player4: dom.editNameBtnPlayer4,
+    };
+  }
+
   function setVisibility(element, visible) {
     element.classList.toggle("hidden", !visible);
   }
@@ -98,6 +107,11 @@
 
   function renderActionButtons(dom, state, gameState) {
     dom.startGameSection.classList.toggle("hidden", !gameState.isHost());
+    const isLobby = !state || !state.game || state.game.phase === "lobby";
+    dom.nameSection.classList.toggle("hidden", !isLobby);
+    if (isLobby) {
+      dom.editNameModal.classList.add("hidden");
+    }
 
     if (!state || !state.game) {
       dom.startGameBtn.classList.remove("hidden");
@@ -211,6 +225,7 @@
     });
     const cardVisuals = getCardVisualElements(dom);
     const cardLabels = getCardLabelElements(dom);
+    const editNameButtons = getEditNameButtonElements(dom);
 
     dom.tableLeftPlayersSection.classList.toggle("hidden", !hasActiveRound);
     dom.tableRightPlayersSection.classList.toggle("hidden", !hasActiveRound);
@@ -221,11 +236,15 @@
       dom.deckPileCountLabel.textContent = "0";
       PLAYER_ROLE_ORDER.forEach((role) => {
         const visual = cardVisuals[role];
+        const editButton = editNameButtons[role];
         if (!visual) {
           return;
         }
         visual.textContent = "--";
         visual.classList.remove("filled", "facedown");
+        if (editButton) {
+          editButton.classList.add("hidden");
+        }
       });
       renderDeckPileVisual(dom.deckPileVisual, 0);
       renderDeckPileVisual(dom.discardPileVisual, 0);
@@ -258,6 +277,7 @@
     PLAYER_ROLE_ORDER.forEach((role) => {
       const visual = cardVisuals[role];
       const label = cardLabels[role];
+      const editButton = editNameButtons[role];
       if (!visual || !label) {
         return;
       }
@@ -272,6 +292,9 @@
       }
 
       const isMe = role === gameState.myRoleValue;
+      if (editButton) {
+        editButton.classList.toggle("hidden", !isMe);
+      }
       const roleHasCard = Boolean(player && player.hasCard);
       const shouldShowMyCard = isMe && myCardVisible;
       const roleFlightInProgress = Boolean(gameState.drawFlightsByRole && gameState.drawFlightsByRole[role]);

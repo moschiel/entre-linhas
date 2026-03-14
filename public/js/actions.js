@@ -11,6 +11,32 @@
     let activeBoardDrag = null;
     document.documentElement.style.setProperty("--draw-anim-ms", `${DRAW_ANIM_MS}ms`);
 
+    function submitPlayerName(name) {
+      const trimmedName = String(name || "").trim();
+      if (!trimmedName) {
+        return false;
+      }
+
+      dom.nameInput.value = trimmedName;
+      dom.editNameInput.value = trimmedName;
+      storage.saveName(trimmedName);
+      socket.emit("player:setName", trimmedName);
+      return true;
+    }
+
+    function openEditNameModal() {
+      const players = (gameState.lastPublicState && gameState.lastPublicState.players) || [];
+      const myPlayer = players.find((player) => player.role === gameState.myRoleValue);
+      dom.editNameInput.value = myPlayer && myPlayer.name ? myPlayer.name : dom.nameInput.value.trim();
+      dom.editNameModal.classList.remove("hidden");
+      dom.editNameInput.focus();
+      dom.editNameInput.select();
+    }
+
+    function closeEditNameModal() {
+      dom.editNameModal.classList.add("hidden");
+    }
+
     function getCardVisualByRole(role) {
       if (role === "host") {
         return dom.currentCardHostVisual;
@@ -560,13 +586,38 @@
     });
 
     dom.saveNameBtn.addEventListener("click", () => {
-      const name = dom.nameInput.value.trim();
-      if (!name) {
-        return;
-      }
+      submitPlayerName(dom.nameInput.value);
+    });
 
-      storage.saveName(name);
-      socket.emit("player:setName", name);
+    [dom.editNameBtnHost, dom.editNameBtnGuest, dom.editNameBtnPlayer3, dom.editNameBtnPlayer4].forEach((button) => {
+      button.addEventListener("click", () => {
+        openEditNameModal();
+      });
+    });
+
+    dom.editNameSaveBtn.addEventListener("click", () => {
+      if (submitPlayerName(dom.editNameInput.value)) {
+        closeEditNameModal();
+      }
+    });
+
+    dom.editNameCloseBtn.addEventListener("click", () => {
+      closeEditNameModal();
+    });
+
+    dom.editNameModal.addEventListener("click", (event) => {
+      if (event.target === dom.editNameModal) {
+        closeEditNameModal();
+      }
+    });
+
+    dom.editNameInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (submitPlayerName(dom.editNameInput.value)) {
+          closeEditNameModal();
+        }
+      }
     });
 
     dom.startGameBtn.addEventListener("click", () => {

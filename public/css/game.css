@@ -40,6 +40,31 @@
   color: var(--muted);
 }
 
+.player-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.player-label-row .deck-visual-label {
+  margin: 0;
+}
+
+.player-name-edit-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--play-line);
+  background: #f8fdf9;
+  color: #3f7862;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .deck-visual-label.player-offline {
   color: #a34f4f;
   font-weight: 700;
@@ -218,6 +243,10 @@
 .modal-header h2 {
   margin: 0;
   font-size: 1.05rem;
+}
+
+.modal-name-row {
+  margin-top: 14px;
 }
 
 .modal-close-btn {
