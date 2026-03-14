@@ -56,7 +56,6 @@
 .game-layout {
   display: grid;
   grid-template-columns: 190px max-content 190px;
-  grid-template-rows: auto auto;
   gap: 10px;
   align-items: start;
   width: fit-content;
@@ -66,7 +65,6 @@
 #boardSection,
 #tableLeftPlayersSection,
 #tableRightPlayersSection,
-#tableSideSection,
 #summarySection {
   background: linear-gradient(180deg, var(--play-surface) 0%, #f5fbf6 100%);
   border-color: var(--play-line);
@@ -80,11 +78,6 @@
   overflow: hidden;
   width: fit-content;
   justify-self: start;
-}
-
-#tableSideSection {
-  padding: 10px;
-  margin-bottom: 0;
 }
 
 #boardSection {
@@ -105,12 +98,6 @@
   grid-row: 1;
   margin-bottom: 0;
   padding: 10px;
-}
-
-#tableSideSection {
-  grid-column: 2;
-  grid-row: 2;
-  margin-bottom: 0;
 }
 
 #boardSection::before {

@@ -21,7 +21,6 @@
       boardSection: document.getElementById("boardSection"),
       tableLeftPlayersSection: document.getElementById("tableLeftPlayersSection"),
       tableRightPlayersSection: document.getElementById("tableRightPlayersSection"),
-      tableSideSection: document.getElementById("tableSideSection"),
       currentCardLabelHost: document.getElementById("currentCardLabelHost"),
       currentCardLabelGuest: document.getElementById("currentCardLabelGuest"),
       currentCardLabelPlayer3: document.getElementById("currentCardLabelPlayer3"),

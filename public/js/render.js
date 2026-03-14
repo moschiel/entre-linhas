@@ -57,6 +57,24 @@
     element.classList.toggle("hidden", !visible);
   }
 
+  function syncSideSectionHeights(dom) {
+    const boardVisible = dom.boardSection && !dom.boardSection.classList.contains("hidden");
+    if (!boardVisible) {
+      dom.tableLeftPlayersSection.style.height = "";
+      dom.tableRightPlayersSection.style.height = "";
+      return;
+    }
+
+    const boardHeight = dom.boardSection.offsetHeight;
+    if (!boardHeight) {
+      return;
+    }
+
+    const syncedHeight = `${boardHeight}px`;
+    dom.tableLeftPlayersSection.style.height = syncedHeight;
+    dom.tableRightPlayersSection.style.height = syncedHeight;
+  }
+
   function renderDeckPileVisual(container, pileCount) {
     container.innerHTML = "";
     container.classList.toggle("empty", pileCount === 0);
@@ -161,6 +179,7 @@
     if (!shouldShow) {
       dom.matrixHeadRow.innerHTML = '<th class="corner-cell">-</th>';
       dom.matrixBody.innerHTML = "";
+      syncSideSectionHeights(dom);
       return;
     }
 
@@ -212,6 +231,7 @@
       .join("");
 
     dom.matrixBody.innerHTML = bodyRows;
+    syncSideSectionHeights(dom);
   }
 
   function renderDeck(dom, gameState, game, fullState) {
@@ -229,7 +249,6 @@
 
     dom.tableLeftPlayersSection.classList.toggle("hidden", !hasActiveRound);
     dom.tableRightPlayersSection.classList.toggle("hidden", !hasActiveRound);
-    dom.tableSideSection.classList.toggle("hidden", !hasActiveRound);
 
     if (!hasActiveRound) {
       gameState.drawFlightsByRole = {};
@@ -256,6 +275,7 @@
       dom.summaryRating.textContent = "-";
       dom.summaryCorrect.textContent = "0";
       dom.summaryDiscarded.textContent = "0";
+      syncSideSectionHeights(dom);
       return;
     }
 
@@ -362,6 +382,7 @@
       dom.summaryDiscarded.textContent = "0";
     }
 
+    syncSideSectionHeights(dom);
   }
 
   function renderRoomStatus(dom, state) {
