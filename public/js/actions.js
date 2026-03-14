@@ -186,6 +186,19 @@
       }
     }
 
+    function getDragTargetPoint(clientX, clientY) {
+      if (!activeBoardDrag || !activeBoardDrag.isTouchMobile) {
+        return { x: clientX, y: clientY };
+      }
+
+      const ghostLeft = Number.parseFloat(activeBoardDrag.ghost.style.left) || 0;
+      const ghostTop = Number.parseFloat(activeBoardDrag.ghost.style.top) || 0;
+      return {
+        x: ghostLeft + (activeBoardDrag.ghostWidth / 2),
+        y: ghostTop + (activeBoardDrag.ghostHeight / 2),
+      };
+    }
+
     function updateBoardDragPosition(clientX, clientY) {
       if (!activeBoardDrag) {
         return;
@@ -207,9 +220,10 @@
         activeBoardDrag.ghost.style.top = `${clientY - activeBoardDrag.offsetY}px`;
       }
 
-      const hoverCell = getBoardCellByPoint(clientX, clientY);
+      const targetPoint = getDragTargetPoint(clientX, clientY);
+      const hoverCell = getBoardCellByPoint(targetPoint.x, targetPoint.y);
       const hoverCoord = hoverCell ? hoverCell.dataset.coord || null : null;
-      const hoverDiscard = isDiscardPileHit(clientX, clientY);
+      const hoverDiscard = isDiscardPileHit(targetPoint.x, targetPoint.y);
       gameState.dragState.hoverCoord = hoverCoord;
       gameState.dragState.hoverDiscard = hoverDiscard;
       syncHoveredCoord(hoverCoord);
