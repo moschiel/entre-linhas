@@ -340,6 +340,8 @@
         return;
       }
 
+      event.preventDefault();
+
       const rect = sourceEl.getBoundingClientRect();
       const ghost = document.createElement("div");
       ghost.className = "board-drag-ghost";
@@ -369,7 +371,6 @@
       window.addEventListener("pointermove", handleBoardDragMove);
       window.addEventListener("pointerup", handleBoardDragEnd);
       window.addEventListener("pointercancel", handleBoardDragCancel);
-      event.preventDefault();
     }
 
     function startPlacedCardDrag(event) {
@@ -388,6 +389,8 @@
       if (!placement) {
         return;
       }
+
+      event.preventDefault();
 
       const rect = targetCard.getBoundingClientRect();
       const ghost = document.createElement("div");
@@ -418,7 +421,6 @@
       window.addEventListener("pointermove", handleBoardDragMove);
       window.addEventListener("pointerup", handleBoardDragEnd);
       window.addEventListener("pointercancel", handleBoardDragCancel);
-      event.preventDefault();
     }
 
     function animateDrawFlight(seat, options) {
@@ -663,6 +665,16 @@
     });
 
     dom.matrixBody.addEventListener("pointerdown", startPlacedCardDrag);
+
+    [dom.matrixBody, dom.currentCardHostVisual, dom.currentCardPlayer2Visual, dom.currentCardPlayer3Visual, dom.currentCardPlayer4Visual]
+      .forEach((element) => {
+        element.addEventListener("contextmenu", (event) => {
+          event.preventDefault();
+        });
+        element.addEventListener("selectstart", (event) => {
+          event.preventDefault();
+        });
+      });
   }
 
   global.EntreLinhasActions = {

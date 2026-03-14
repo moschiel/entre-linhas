@@ -87,6 +87,9 @@
   background: #fffdf8;
   border: 1px solid #dae6dc;
   overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .coord-cell.filled {
@@ -123,6 +126,10 @@
   line-height: 1;
   letter-spacing: 0.9px;
   margin: 0 auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }
 
 .board-card-faceup {
