@@ -5,6 +5,7 @@
       saveNameBtn: document.getElementById("saveNameBtn"),
       nameSection: document.getElementById("nameSection"),
       statusSection: document.getElementById("statusSection"),
+      gameTitle: document.getElementById("gameTitle"),
       myRole: document.getElementById("myRole"),
       roomStatus: document.getElementById("roomStatus"),
       gameStatus: document.getElementById("gameStatus"),

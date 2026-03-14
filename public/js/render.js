@@ -136,6 +136,7 @@
   function renderActionButtons(dom, state, gameState) {
     dom.startGameSection.classList.toggle("hidden", !gameState.isHost());
     const isLobby = !state || !state.game || state.game.phase === "lobby";
+    dom.gameTitle.classList.toggle("hidden", !isLobby);
     dom.statusSection.classList.toggle("hidden", !isLobby);
     dom.nameSection.classList.toggle("hidden", !isLobby);
     if (isLobby) {
