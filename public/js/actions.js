@@ -4,12 +4,31 @@
   const DRAW_ANIM_MS = Number(uiConfig.drawAnimationMs) || 1000;
   const DRAW_ANIM_BUFFER_MS = Number(uiConfig.drawAnimationBufferMs) || 100;
   const DRAW_ANIM_HANDOFF_MS = Number(uiConfig.drawAnimationHandoffMs) || 120;
+  const MOBILE_DRAG_SCALE = Number(uiConfig.mobileDragScale) || 1.38;
+  const MOBILE_DRAG_GHOST_GAP = Number(uiConfig.mobileDragGhostGap) || 28;
+  const MOBILE_DRAG_HAPTIC_MS = Number(uiConfig.mobileDragHapticMs) || 22;
 
   function bindUiActions(socket, deps) {
     const { dom, gameState, storage, render } = deps;
     let activeFlightCoordEl = null;
     let activeBoardDrag = null;
     document.documentElement.style.setProperty("--draw-anim-ms", `${DRAW_ANIM_MS}ms`);
+
+    function isTouchMobileUi(event) {
+      if (event && event.pointerType === "touch") {
+        return true;
+      }
+
+      return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    }
+
+    function triggerDragHaptic(isTouchMobile) {
+      if (typeof navigator.vibrate !== "function" || !isTouchMobile) {
+        return;
+      }
+
+      navigator.vibrate(MOBILE_DRAG_HAPTIC_MS);
+    }
 
     function submitPlayerName(name) {
       const trimmedName = String(name || "").trim();
@@ -174,8 +193,19 @@
 
       activeBoardDrag.lastClientX = clientX;
       activeBoardDrag.lastClientY = clientY;
-      activeBoardDrag.ghost.style.left = `${clientX - activeBoardDrag.offsetX}px`;
-      activeBoardDrag.ghost.style.top = `${clientY - activeBoardDrag.offsetY}px`;
+      if (activeBoardDrag.isTouchMobile) {
+        const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+        const ghostLeft = Math.max(
+          8,
+          Math.min(clientX - (activeBoardDrag.ghostWidth / 2), viewportWidth - activeBoardDrag.ghostWidth - 8),
+        );
+        const ghostTop = Math.max(8, clientY - activeBoardDrag.ghostHeight - MOBILE_DRAG_GHOST_GAP);
+        activeBoardDrag.ghost.style.left = `${ghostLeft}px`;
+        activeBoardDrag.ghost.style.top = `${ghostTop}px`;
+      } else {
+        activeBoardDrag.ghost.style.left = `${clientX - activeBoardDrag.offsetX}px`;
+        activeBoardDrag.ghost.style.top = `${clientY - activeBoardDrag.offsetY}px`;
+      }
 
       const hoverCell = getBoardCellByPoint(clientX, clientY);
       const hoverCoord = hoverCell ? hoverCell.dataset.coord || null : null;
@@ -343,13 +373,16 @@
       event.preventDefault();
 
       const rect = sourceEl.getBoundingClientRect();
+      const isTouchMobile = isTouchMobileUi(event);
+      const ghostWidth = isTouchMobile ? rect.width * MOBILE_DRAG_SCALE : rect.width;
+      const ghostHeight = isTouchMobile ? rect.height * MOBILE_DRAG_SCALE : rect.height;
       const ghost = document.createElement("div");
-      ghost.className = "board-drag-ghost";
+      ghost.className = `board-drag-ghost${isTouchMobile ? " mobile-lifted" : ""}`;
       ghost.textContent = card.coord;
       ghost.style.left = `${rect.left}px`;
       ghost.style.top = `${rect.top}px`;
-      ghost.style.width = `${rect.width}px`;
-      ghost.style.height = `${rect.height}px`;
+      ghost.style.width = `${ghostWidth}px`;
+      ghost.style.height = `${ghostHeight}px`;
       document.body.appendChild(ghost);
 
       activeBoardDrag = {
@@ -359,12 +392,16 @@
         ghost,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
+        ghostWidth,
+        ghostHeight,
+        isTouchMobile,
       };
       gameState.dragState.active = true;
       gameState.dragState.pointerId = event.pointerId;
       gameState.dragState.sourceType = "hand";
       gameState.dragState.sourceCoord = null;
       sourceEl.classList.add("dragging");
+      triggerDragHaptic(isTouchMobile);
       render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
       updateBoardDragPosition(event.clientX, event.clientY);
 
@@ -393,13 +430,16 @@
       event.preventDefault();
 
       const rect = targetCard.getBoundingClientRect();
+      const isTouchMobile = isTouchMobileUi(event);
+      const ghostWidth = isTouchMobile ? rect.width * MOBILE_DRAG_SCALE : rect.width;
+      const ghostHeight = isTouchMobile ? rect.height * MOBILE_DRAG_SCALE : rect.height;
       const ghost = document.createElement("div");
-      ghost.className = "board-drag-ghost";
+      ghost.className = `board-drag-ghost${isTouchMobile ? " mobile-lifted" : ""}`;
       ghost.textContent = placement.cardCoord || placement.coord;
       ghost.style.left = `${rect.left}px`;
       ghost.style.top = `${rect.top}px`;
-      ghost.style.width = `${rect.width}px`;
-      ghost.style.height = `${rect.height}px`;
+      ghost.style.width = `${ghostWidth}px`;
+      ghost.style.height = `${ghostHeight}px`;
       document.body.appendChild(ghost);
 
       activeBoardDrag = {
@@ -410,11 +450,15 @@
         ghost,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
+        ghostWidth,
+        ghostHeight,
+        isTouchMobile,
       };
       gameState.dragState.active = true;
       gameState.dragState.pointerId = event.pointerId;
       gameState.dragState.sourceType = "board";
       gameState.dragState.sourceCoord = sourceCoord;
+      triggerDragHaptic(isTouchMobile);
       render.renderBoard(dom, gameState, gameState.lastGameState);
       updateBoardDragPosition(event.clientX, event.clientY);
 

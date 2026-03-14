@@ -15,6 +15,12 @@
       drawAnimationBufferMs: 100,
       // Tempo que o ghost permanece sobre a carta final antes de sumir (handoff visual).
       drawAnimationHandoffMs: 120,
+      // Escala da carta arrastada no mobile ao "levantar" para fora do dedo.
+      mobileDragScale: 1.2,
+      // Distancia vertical, em px, entre o dedo e a carta levantada no mobile.
+      mobileDragGhostGap: 28,
+      // Duracao da vibracao curta ao iniciar o drag no mobile, em ms.
+      mobileDragHapticMs: 22,
       // Exibe o nome do jogador sobre a carta ja colocada no tabuleiro.
       showPlacedCardOwner: false,
     },
