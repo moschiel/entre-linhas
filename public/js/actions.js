@@ -62,6 +62,11 @@
       return players.find((player) => player.seat === seat) || null;
     }
 
+    function getPlayerNameBySeat(seat) {
+      const player = getPlayerBySeat(seat);
+      return player && player.name ? player.name : `Jogador ${seat}`;
+    }
+
     function openRemovePlayerModal(seat) {
       if (!gameState.isHost()) {
         return;
@@ -254,7 +259,10 @@
       ghost.style.height = `${baseRect.height}px`;
       ghost.style.left = `${baseRect.left}px`;
       ghost.style.top = `${baseRect.top}px`;
-      ghost.textContent = isBoardSource ? (payload.cardCoord || payload.sourceCoord || "") : "";
+      ghost.innerHTML = `
+        <div class="remote-drag-name seat-name-${seat}">${getPlayerNameBySeat(seat)}</div>
+        <div class="remote-drag-card-value">${isBoardSource ? (payload.cardCoord || payload.sourceCoord || "") : ""}</div>
+      `;
       document.body.appendChild(ghost);
 
       gameState.remoteDragBySeat[seat] = {
