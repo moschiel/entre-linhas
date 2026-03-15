@@ -214,6 +214,12 @@
   transition: transform 120ms ease, filter 120ms ease;
 }
 
+.impact-ripple-discard {
+  border: 3px solid rgba(86, 98, 96, 0.72);
+  box-shadow: 0 0 0 2px rgba(86, 98, 96, 0.12);
+  animation: discard-impact-ripple 360ms ease-out forwards;
+}
+
 .deck-pile-visual.empty::after {
   content: "vazia";
   position: absolute;
@@ -611,5 +617,22 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes discard-impact-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.25);
+    opacity: 0.95;
+  }
+
+  70% {
+    transform: translate(-50%, -50%) scale(5.4);
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(6.4);
+    opacity: 0;
   }
 }

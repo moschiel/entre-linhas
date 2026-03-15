@@ -221,6 +221,24 @@
       socket.emit("drag:end");
     }
 
+    function spawnImpactRipple(target, rippleClass) {
+      if (!target || !rippleClass) {
+        return;
+      }
+
+      const targetRect = target.getBoundingClientRect();
+      const ripple = document.createElement("span");
+      ripple.className = `impact-ripple impact-ripple-fixed ${rippleClass}`;
+      ripple.style.left = `${targetRect.left + (targetRect.width / 2)}px`;
+      ripple.style.top = `${targetRect.top + (targetRect.height / 2)}px`;
+      document.body.appendChild(ripple);
+      ripple.addEventListener("animationend", () => {
+        if (ripple.parentNode) {
+          ripple.parentNode.removeChild(ripple);
+        }
+      }, { once: true });
+    }
+
     function clearRemoteDragGhost(seat) {
       const remoteDrag = gameState.remoteDragBySeat[seat];
       if (!remoteDrag) {
@@ -899,6 +917,24 @@
       }
 
       clearRemoteDragGhost(seat);
+    });
+
+    window.addEventListener("entrelinhas:drag-landed", (event) => {
+      const payload = event && event.detail ? event.detail : null;
+      const targetType = payload && payload.targetType;
+      const coord = payload && typeof payload.coord === "string" ? payload.coord : "";
+
+      window.requestAnimationFrame(() => {
+        if (targetType === "board" && coord) {
+          const targetCell = dom.matrixBody.querySelector(`[data-coord="${coord}"]`);
+          spawnImpactRipple(targetCell, "impact-ripple-board");
+          return;
+        }
+
+        if (targetType === "discard") {
+          spawnImpactRipple(dom.discardPileVisual, "impact-ripple-discard");
+        }
+      });
     });
 
     dom.saveNameBtn.addEventListener("click", () => {

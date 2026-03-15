@@ -244,6 +244,12 @@
       }));
     });
 
+    socket.on("drag:landed", (payload) => {
+      window.dispatchEvent(new CustomEvent("entrelinhas:drag-landed", {
+        detail: payload || {},
+      }));
+    });
+
   }
 
   global.EntreLinhasSocket = {

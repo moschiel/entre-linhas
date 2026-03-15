@@ -139,6 +139,11 @@ function registerSocketHandlers(io, sessionState) {
       }
 
       socket.data.dragActive = false;
+      io.emit("drag:landed", {
+        seat: requester.seat,
+        targetType: "board",
+        coord: safeCoord,
+      });
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
     });
@@ -161,6 +166,10 @@ function registerSocketHandlers(io, sessionState) {
       }
 
       socket.data.dragActive = false;
+      io.emit("drag:landed", {
+        seat: requester.seat,
+        targetType: "discard",
+      });
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
     });
@@ -179,6 +188,11 @@ function registerSocketHandlers(io, sessionState) {
       }
 
       socket.data.dragActive = false;
+      io.emit("drag:landed", {
+        seat: requester.seat,
+        targetType: "board",
+        coord: toCoord,
+      });
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
     });
