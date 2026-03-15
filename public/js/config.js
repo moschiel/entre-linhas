@@ -23,6 +23,8 @@
       mobileDragHapticMs: 22,
       // Exibe a coordenada no centro das celulas vazias do tabuleiro.
       showEmptyCellCoords: false,
+      // Exibe a quantidade de cartas restante ao lado do titulo da pilha.
+      showDrawPileCount: false,
       // Exibe o nome do jogador sobre a carta ja colocada no tabuleiro.
       showPlacedCardOwner: false,
     },

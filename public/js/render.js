@@ -4,6 +4,7 @@
   const uiConfig = config.ui || {};
   const BOARD_WORD_SHRINK_THRESHOLD = Number(uiConfig.boardWordShrinkThreshold) || 7;
   const SHOW_EMPTY_CELL_COORDS = uiConfig.showEmptyCellCoords !== false;
+  const SHOW_DRAW_PILE_COUNT = uiConfig.showDrawPileCount === true;
 
   function getWordSizeClass(word) {
     return typeof word === "string" && word.length > BOARD_WORD_SHRINK_THRESHOLD ? " tight" : "";
@@ -284,6 +285,7 @@
     if (!hasActiveRound) {
       gameState.drawFlightsBySeat = {};
       dom.deckPileCountLabel.textContent = "0";
+      dom.deckPileCountWrap.classList.toggle("hidden", !SHOW_DRAW_PILE_COUNT);
       PLAYER_SEAT_ORDER.forEach((seat) => {
         const visual = cardVisuals[seat];
         const panel = cardPanels[seat];
@@ -320,6 +322,7 @@
     }
 
     dom.deckPileCountLabel.textContent = String(game.drawPileCount || 0);
+    dom.deckPileCountWrap.classList.toggle("hidden", !SHOW_DRAW_PILE_COUNT);
     const hasPrivateCard = Boolean(gameState.myPrivateCard);
     const hasCard = hasPrivateCard && !gameState.drawFlightInProgress;
     const myCardVisible = hasCard && !gameState.dragState.active && !gameState.placingCardInProgress;

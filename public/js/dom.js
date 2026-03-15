@@ -51,6 +51,7 @@
       discardPilePanel: document.getElementById("discardPilePanel"),
       matrixHeadRow: document.getElementById("matrixHeadRow"),
       matrixBody: document.getElementById("matrixBody"),
+      deckPileCountWrap: document.getElementById("deckPileCountWrap"),
       deckPileCountLabel: document.getElementById("deckPileCountLabel"),
       deckPileVisual: document.getElementById("deckPileVisual"),
       discardPileVisual: document.getElementById("discardPileVisual"),
