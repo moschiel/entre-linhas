@@ -97,6 +97,7 @@
 
     socket.on("state:update", (state) => {
       const normalizedState = normalizeState(state);
+      const previousPhase = gameState.lastGameState ? gameState.lastGameState.phase : null;
       gameState.placingCardInProgress = false;
       const nextSeatHasCardMap = {};
       (normalizedState.players || []).forEach((player) => {
@@ -119,6 +120,15 @@
       gameState.seatHasCardMap = nextSeatHasCardMap;
       gameState.lastPublicState = normalizedState;
       gameState.lastGameState = normalizedState.game || null;
+      const nextPhase = normalizedState.game ? normalizedState.game.phase : null;
+      if (previousPhase !== nextPhase) {
+        window.dispatchEvent(new CustomEvent("entrelinhas:phase-changed", {
+          detail: {
+            from: previousPhase,
+            to: nextPhase,
+          },
+        }));
+      }
       if (!normalizedState.game || normalizedState.game.phase !== "in_game") {
         window.dispatchEvent(new CustomEvent("entrelinhas:remote-drag-end", {
           detail: {},

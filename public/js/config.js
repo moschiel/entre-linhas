@@ -23,6 +23,10 @@
       mobileDragHapticMs: 22,
       // Intervalo minimo entre envios de posicao do drag compartilhado, em ms.
       remoteDragBroadcastMs: 50,
+      // Liga ou desliga os efeitos sonoros do jogo.
+      enableSound: false,
+      // Volume geral dos efeitos sonoros (0 a 1).
+      soundVolume: 0.8,
       // Exibe a coordenada no centro das celulas vazias do tabuleiro.
       showEmptyCellCoords: false,
       // Exibe a quantidade de cartas restante ao lado do titulo da pilha.

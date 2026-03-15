@@ -5,6 +5,7 @@
   const { state } = global.EntreLinhasState;
   const storage = global.EntreLinhasStorage;
   const render = global.EntreLinhasRender;
+  const sound = global.EntreLinhasSound ? global.EntreLinhasSound.createSoundSystem() : null;
 
   if (Number(uiConfig.boardCellSize) > 0) {
     document.documentElement.style.setProperty("--board-cell-size", `${Number(uiConfig.boardCellSize)}px`);
@@ -25,6 +26,9 @@
 
   const playerToken = storage.getOrCreateToken();
   const socket = global.EntreLinhasSocket.createSocket(playerToken);
+  if (sound) {
+    sound.bindEvents();
+  }
 
   global.EntreLinhasSocket.bindSocketEvents(socket, {
     dom,
