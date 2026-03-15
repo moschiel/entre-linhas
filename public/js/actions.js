@@ -7,6 +7,7 @@
   const MOBILE_DRAG_SCALE = Number(uiConfig.mobileDragScale) || 1.38;
   const MOBILE_DRAG_GHOST_GAP = Number(uiConfig.mobileDragGhostGap) || 28;
   const MOBILE_DRAG_HAPTIC_MS = Number(uiConfig.mobileDragHapticMs) || 22;
+  const REMOTE_DRAG_BROADCAST_MS = Number(uiConfig.remoteDragBroadcastMs) || 50;
 
   function bindUiActions(socket, deps) {
     const { dom, gameState, storage, render } = deps;
@@ -101,6 +102,190 @@
       return dom.currentCardHostVisual;
     }
 
+    function getGameLayoutRect() {
+      if (!dom.gameLayout) {
+        return null;
+      }
+
+      const rect = dom.gameLayout.getBoundingClientRect();
+      if (!rect.width || !rect.height) {
+        return null;
+      }
+
+      return rect;
+    }
+
+    function buildNormalizedDragPosition() {
+      if (!activeBoardDrag || !activeBoardDrag.ghost) {
+        return null;
+      }
+
+      const frameRect = getGameLayoutRect();
+      if (!frameRect) {
+        return null;
+      }
+
+      const ghostLeft = Number.parseFloat(activeBoardDrag.ghost.style.left) || 0;
+      const ghostTop = Number.parseFloat(activeBoardDrag.ghost.style.top) || 0;
+      const centerX = ghostLeft + (activeBoardDrag.ghostWidth / 2);
+      const centerY = ghostTop + (activeBoardDrag.ghostHeight / 2);
+
+      return {
+        relX: Math.max(0, Math.min(1, (centerX - frameRect.left) / frameRect.width)),
+        relY: Math.max(0, Math.min(1, (centerY - frameRect.top) / frameRect.height)),
+      };
+    }
+
+    function flushRemoteDragMove() {
+      if (!activeBoardDrag || !activeBoardDrag.remoteBroadcastStarted) {
+        return;
+      }
+
+      if (activeBoardDrag.remoteBroadcastTimer) {
+        window.clearTimeout(activeBoardDrag.remoteBroadcastTimer);
+        activeBoardDrag.remoteBroadcastTimer = null;
+      }
+
+      const normalizedPosition = activeBoardDrag.pendingRemotePosition || buildNormalizedDragPosition();
+      activeBoardDrag.pendingRemotePosition = null;
+      if (!normalizedPosition) {
+        return;
+      }
+
+      activeBoardDrag.lastRemoteBroadcastAt = Date.now();
+      socket.emit("drag:move", normalizedPosition);
+    }
+
+    function queueRemoteDragMove() {
+      if (!activeBoardDrag || !activeBoardDrag.remoteBroadcastStarted) {
+        return;
+      }
+
+      activeBoardDrag.pendingRemotePosition = buildNormalizedDragPosition();
+      if (!activeBoardDrag.pendingRemotePosition) {
+        return;
+      }
+
+      const now = Date.now();
+      const elapsed = now - (activeBoardDrag.lastRemoteBroadcastAt || 0);
+      if (elapsed >= REMOTE_DRAG_BROADCAST_MS) {
+        flushRemoteDragMove();
+        return;
+      }
+
+      if (activeBoardDrag.remoteBroadcastTimer) {
+        return;
+      }
+
+      activeBoardDrag.remoteBroadcastTimer = window.setTimeout(() => {
+        flushRemoteDragMove();
+      }, REMOTE_DRAG_BROADCAST_MS - elapsed);
+    }
+
+    function emitRemoteDragStartForOthers() {
+      if (!activeBoardDrag || activeBoardDrag.remoteBroadcastStarted) {
+        return;
+      }
+
+      const payload = {
+        sourceType: activeBoardDrag.mode === "board" ? "board" : "hand",
+      };
+
+      if (activeBoardDrag.mode === "board" && activeBoardDrag.sourceCoord) {
+        payload.sourceCoord = activeBoardDrag.sourceCoord;
+        payload.cardCoord = activeBoardDrag.cardCoord || activeBoardDrag.sourceCoord;
+      }
+
+      socket.emit("drag:start", payload);
+      activeBoardDrag.remoteBroadcastStarted = true;
+      activeBoardDrag.lastRemoteBroadcastAt = 0;
+      queueRemoteDragMove();
+    }
+
+    function emitRemoteDragEndForOthers() {
+      if (!activeBoardDrag || !activeBoardDrag.remoteBroadcastStarted) {
+        return;
+      }
+
+      if (activeBoardDrag.remoteBroadcastTimer) {
+        window.clearTimeout(activeBoardDrag.remoteBroadcastTimer);
+        activeBoardDrag.remoteBroadcastTimer = null;
+      }
+      activeBoardDrag.pendingRemotePosition = null;
+      activeBoardDrag.remoteBroadcastStarted = false;
+      socket.emit("drag:end");
+    }
+
+    function clearRemoteDragGhost(seat) {
+      const remoteDrag = gameState.remoteDragBySeat[seat];
+      if (!remoteDrag) {
+        return;
+      }
+
+      if (remoteDrag.ghost && remoteDrag.ghost.parentNode) {
+        remoteDrag.ghost.parentNode.removeChild(remoteDrag.ghost);
+      }
+
+      delete gameState.remoteDragBySeat[seat];
+      render.renderBoard(dom, gameState, gameState.lastGameState);
+      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+    }
+
+    function clearAllRemoteDragGhosts() {
+      Object.keys(gameState.remoteDragBySeat).forEach((seatKey) => {
+        clearRemoteDragGhost(Number(seatKey));
+      });
+    }
+
+    function createRemoteDragGhost(payload) {
+      const seat = payload && Number(payload.seat);
+      const sourceType = payload && payload.sourceType === "board" ? "board" : "hand";
+      if (!Number.isInteger(seat) || seat === gameState.mySeatValue) {
+        return;
+      }
+
+      clearRemoteDragGhost(seat);
+
+      const baseRect = getCardVisualBySeat(seat).getBoundingClientRect();
+      const ghost = document.createElement("div");
+      const isBoardSource = sourceType === "board";
+      ghost.className = `board-drag-ghost remote-drag-ghost${isBoardSource ? "" : " is-facedown"} seat-ghost-${seat}`;
+      ghost.style.width = `${baseRect.width}px`;
+      ghost.style.height = `${baseRect.height}px`;
+      ghost.style.left = `${baseRect.left}px`;
+      ghost.style.top = `${baseRect.top}px`;
+      ghost.textContent = isBoardSource ? (payload.cardCoord || payload.sourceCoord || "") : "";
+      document.body.appendChild(ghost);
+
+      gameState.remoteDragBySeat[seat] = {
+        seat,
+        sourceType,
+        sourceCoord: payload.sourceCoord || null,
+        ghost,
+      };
+      render.renderBoard(dom, gameState, gameState.lastGameState);
+      render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+    }
+
+    function updateRemoteDragGhostPosition(payload) {
+      const seat = payload && Number(payload.seat);
+      const relX = Number(payload && payload.relX);
+      const relY = Number(payload && payload.relY);
+      const remoteDrag = seat ? gameState.remoteDragBySeat[seat] : null;
+      const frameRect = getGameLayoutRect();
+
+      if (!remoteDrag || !remoteDrag.ghost || !frameRect || !Number.isFinite(relX) || !Number.isFinite(relY)) {
+        return;
+      }
+
+      const ghostWidth = remoteDrag.ghost.offsetWidth;
+      const ghostHeight = remoteDrag.ghost.offsetHeight;
+      const centerX = frameRect.left + (Math.max(0, Math.min(1, relX)) * frameRect.width);
+      const centerY = frameRect.top + (Math.max(0, Math.min(1, relY)) * frameRect.height);
+      remoteDrag.ghost.style.left = `${centerX - (ghostWidth / 2)}px`;
+      remoteDrag.ghost.style.top = `${centerY - (ghostHeight / 2)}px`;
+    }
+
     function canDrawFromPile() {
       const game = gameState.lastGameState;
       if (!game || game.phase !== "in_game") {
@@ -193,6 +378,7 @@
         return;
       }
 
+      emitRemoteDragEndForOthers();
       window.removeEventListener("pointermove", handleBoardDragMove);
       window.removeEventListener("pointerup", handleBoardDragEnd);
       window.removeEventListener("pointercancel", handleBoardDragCancel);
@@ -257,6 +443,7 @@
       gameState.dragState.hoverDiscard = hoverDiscard;
       syncHoveredCoord(hoverCoord);
       render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+      queueRemoteDragMove();
     }
 
     function handleBoardDragMove(event) {
@@ -438,6 +625,10 @@
         ghostWidth,
         ghostHeight,
         isTouchMobile,
+        remoteBroadcastStarted: false,
+        remoteBroadcastTimer: null,
+        lastRemoteBroadcastAt: 0,
+        pendingRemotePosition: null,
       };
       gameState.dragState.active = true;
       gameState.dragState.pointerId = event.pointerId;
@@ -446,6 +637,7 @@
       sourceEl.classList.add("dragging");
       triggerDragHaptic(isTouchMobile);
       render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
+      emitRemoteDragStartForOthers();
       updateBoardDragPosition(event.clientX, event.clientY);
 
       window.addEventListener("pointermove", handleBoardDragMove);
@@ -490,12 +682,17 @@
         pointerId: event.pointerId,
         sourceEl: targetCard,
         sourceCoord,
+        cardCoord: placement.cardCoord || placement.coord,
         ghost,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
         ghostWidth,
         ghostHeight,
         isTouchMobile,
+        remoteBroadcastStarted: false,
+        remoteBroadcastTimer: null,
+        lastRemoteBroadcastAt: 0,
+        pendingRemotePosition: null,
       };
       gameState.dragState.active = true;
       gameState.dragState.pointerId = event.pointerId;
@@ -503,6 +700,7 @@
       gameState.dragState.sourceCoord = sourceCoord;
       triggerDragHaptic(isTouchMobile);
       render.renderBoard(dom, gameState, gameState.lastGameState);
+      emitRemoteDragStartForOthers();
       updateBoardDragPosition(event.clientX, event.clientY);
 
       window.addEventListener("pointermove", handleBoardDragMove);
@@ -672,6 +870,27 @@
           render.renderDeck(dom, gameState, gameState.lastGameState, gameState.lastPublicState);
         },
       });
+    });
+
+    window.addEventListener("entrelinhas:remote-drag-start", (event) => {
+      const payload = event && event.detail ? event.detail : null;
+      createRemoteDragGhost(payload);
+    });
+
+    window.addEventListener("entrelinhas:remote-drag-move", (event) => {
+      const payload = event && event.detail ? event.detail : null;
+      updateRemoteDragGhostPosition(payload);
+    });
+
+    window.addEventListener("entrelinhas:remote-drag-end", (event) => {
+      const payload = event && event.detail ? event.detail : null;
+      const seat = payload && Number(payload.seat);
+      if (!Number.isInteger(seat)) {
+        clearAllRemoteDragGhosts();
+        return;
+      }
+
+      clearRemoteDragGhost(seat);
     });
 
     dom.saveNameBtn.addEventListener("click", () => {

@@ -21,6 +21,8 @@
       mobileDragGhostGap: 28,
       // Duracao da vibracao curta ao iniciar o drag no mobile, em ms.
       mobileDragHapticMs: 22,
+      // Intervalo minimo entre envios de posicao do drag compartilhado, em ms.
+      remoteDragBroadcastMs: 50,
       // Exibe a coordenada no centro das celulas vazias do tabuleiro.
       showEmptyCellCoords: false,
       // Exibe a quantidade de cartas restante ao lado do titulo da pilha.

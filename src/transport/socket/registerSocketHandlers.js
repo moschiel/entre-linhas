@@ -62,6 +62,7 @@ function registerSocketHandlers(io, sessionState) {
     socket.data.slotKey = slot.slotKey;
     socket.data.systemRole = slot.systemRole;
     socket.data.seat = slot.seat;
+    socket.data.dragActive = false;
 
     socket.emit("session:assigned", {
       systemRole: slot.systemRole,
@@ -137,6 +138,7 @@ function registerSocketHandlers(io, sessionState) {
         return;
       }
 
+      socket.data.dragActive = false;
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
     });
@@ -158,6 +160,7 @@ function registerSocketHandlers(io, sessionState) {
         return;
       }
 
+      socket.data.dragActive = false;
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
     });
@@ -175,8 +178,78 @@ function registerSocketHandlers(io, sessionState) {
         return;
       }
 
+      socket.data.dragActive = false;
       emitState(io, sessionState);
       emitPrivateState(io, sessionState);
+    });
+
+    socket.on("drag:start", (payload) => {
+      const requester = getSlotByToken(sessionState, playerToken);
+      const sourceType = payload && typeof payload.sourceType === "string" ? payload.sourceType : "";
+      const sourceCoord = payload && typeof payload.sourceCoord === "string" ? payload.sourceCoord.trim().toUpperCase() : null;
+
+      if (!requester || sessionState.game.phase !== "in_game") {
+        return;
+      }
+
+      if (sourceType === "hand") {
+        if (!sessionState.game.hands[requester.slotKey]) {
+          return;
+        }
+
+        socket.data.dragActive = true;
+        socket.broadcast.emit("drag:remoteStart", {
+          seat: requester.seat,
+          sourceType: "hand",
+        });
+        return;
+      }
+
+      if (sourceType === "board") {
+        const placement = sourceCoord ? sessionState.game.boardPlacements[sourceCoord] : null;
+        if (!placement) {
+          return;
+        }
+
+        socket.data.dragActive = true;
+        socket.broadcast.emit("drag:remoteStart", {
+          seat: requester.seat,
+          sourceType: "board",
+          sourceCoord,
+          cardCoord: placement.cardCoord || placement.coord,
+        });
+      }
+    });
+
+    socket.on("drag:move", (payload) => {
+      const requester = getSlotByToken(sessionState, playerToken);
+      const relX = Number(payload && payload.relX);
+      const relY = Number(payload && payload.relY);
+
+      if (!requester || sessionState.game.phase !== "in_game" || !socket.data.dragActive) {
+        return;
+      }
+
+      if (!Number.isFinite(relX) || !Number.isFinite(relY)) {
+        return;
+      }
+
+      socket.broadcast.emit("drag:remoteMove", {
+        seat: requester.seat,
+        relX: Math.max(0, Math.min(1, relX)),
+        relY: Math.max(0, Math.min(1, relY)),
+      });
+    });
+
+    socket.on("drag:end", () => {
+      if (!socket.data.dragActive) {
+        return;
+      }
+
+      socket.data.dragActive = false;
+      socket.broadcast.emit("drag:remoteEnd", {
+        seat: socket.data.seat,
+      });
     });
 
     socket.on("card:invalidate", (coord) => {
@@ -235,13 +308,19 @@ function registerSocketHandlers(io, sessionState) {
       blockPlayerToken(sessionState, removedSlot.playerToken);
 
       if (removedSlot.socketId) {
+        const removedSocket = io.sockets.sockets.get(removedSlot.socketId);
+        if (removedSocket && removedSocket.data && removedSocket.data.dragActive) {
+          removedSocket.broadcast.emit("drag:remoteEnd", {
+            seat: removedSlot.seat,
+          });
+        }
+
         io.to(removedSlot.socketId).emit("session:removed", {
           message: "Voce foi removido da sala pelo host.",
         });
 
-        const targetSocket = io.sockets.sockets.get(removedSlot.socketId);
-        if (targetSocket) {
-          targetSocket.disconnect(true);
+        if (removedSocket) {
+          removedSocket.disconnect(true);
         }
       }
 
@@ -256,8 +335,15 @@ function registerSocketHandlers(io, sessionState) {
         return;
       }
 
+      if (socket.data.dragActive) {
+        socket.broadcast.emit("drag:remoteEnd", {
+          seat: socket.data.seat,
+        });
+      }
+
       target.online = false;
       target.socketId = null;
+      socket.data.dragActive = false;
       emitState(io, sessionState);
     });
   });

@@ -119,6 +119,11 @@
       gameState.seatHasCardMap = nextSeatHasCardMap;
       gameState.lastPublicState = normalizedState;
       gameState.lastGameState = normalizedState.game || null;
+      if (!normalizedState.game || normalizedState.game.phase !== "in_game") {
+        window.dispatchEvent(new CustomEvent("entrelinhas:remote-drag-end", {
+          detail: {},
+        }));
+      }
       const disconnectedPlayer = (normalizedState.players || []).find((player) => player.occupied && !player.online) || null;
       gameState.statusContext = {
         disconnectedSeat: disconnectedPlayer ? disconnectedPlayer.seat : null,
@@ -218,6 +223,24 @@
         detail: {
           seat,
         },
+      }));
+    });
+
+    socket.on("drag:remoteStart", (payload) => {
+      window.dispatchEvent(new CustomEvent("entrelinhas:remote-drag-start", {
+        detail: payload || {},
+      }));
+    });
+
+    socket.on("drag:remoteMove", (payload) => {
+      window.dispatchEvent(new CustomEvent("entrelinhas:remote-drag-move", {
+        detail: payload || {},
+      }));
+    });
+
+    socket.on("drag:remoteEnd", (payload) => {
+      window.dispatchEvent(new CustomEvent("entrelinhas:remote-drag-end", {
+        detail: payload || {},
       }));
     });
 

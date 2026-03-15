@@ -254,6 +254,11 @@
     const cols = game.matrix.cols || [];
     const rows = game.matrix.rows || [];
     const placements = {};
+    const remoteBoardDragCoords = new Set(
+      Object.values(gameState.remoteDragBySeat || {})
+        .filter((drag) => drag && drag.sourceType === "board" && drag.sourceCoord)
+        .map((drag) => drag.sourceCoord),
+    );
 
     (game.boardPlacements || []).forEach((placement) => {
       placements[placement.coord] = placement;
@@ -279,8 +284,9 @@
             const isMovingSource = gameState.dragState.active
               && gameState.dragState.sourceType === "board"
               && gameState.dragState.sourceCoord === coord;
+            const isRemoteMovingSource = remoteBoardDragCoords.has(coord);
 
-            if (!placed || isMovingSource) {
+            if (!placed || isMovingSource || isRemoteMovingSource) {
               return `<td class="coord-cell${hoverClass}" data-coord="${coord}"><div class="coord-slot-label">${SHOW_EMPTY_CELL_COORDS ? coord : ""}</div></td>`;
             }
 
@@ -419,11 +425,13 @@
         removeButton.disabled = seat === gameState.pendingRemovalSeat;
       }
       const roleHasCard = Boolean(player && player.hasCard);
+      const remoteDrag = gameState.remoteDragBySeat && gameState.remoteDragBySeat[seat];
+      const remoteHandDragInProgress = Boolean(remoteDrag && remoteDrag.sourceType === "hand");
       const shouldShowMyCard = isMe && myCardVisible;
       const roleFlightInProgress = Boolean(gameState.drawFlightsBySeat && gameState.drawFlightsBySeat[seat]);
       visual.classList.remove("facedown");
 
-      if (roleFlightInProgress) {
+      if (roleFlightInProgress || remoteHandDragInProgress) {
         visual.textContent = "--";
         visual.classList.remove("filled");
       } else if (shouldShowMyCard) {

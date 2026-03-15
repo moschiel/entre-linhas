@@ -20,6 +20,7 @@
       startGameBtn: document.getElementById("startGameBtn"),
       actionHint: document.getElementById("actionHint"),
       hostMenuBtn: document.getElementById("hostMenuBtn"),
+      gameLayout: document.getElementById("gameLayout"),
       boardSection: document.getElementById("boardSection"),
       tableLeftPlayersSection: document.getElementById("tableLeftPlayersSection"),
       tableRightPlayersSection: document.getElementById("tableRightPlayersSection"),

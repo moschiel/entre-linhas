@@ -506,6 +506,38 @@
   z-index: 10000;
 }
 
+.board-drag-ghost.remote-drag-ghost {
+  opacity: 0.88;
+  transition:
+    left 70ms linear,
+    top 70ms linear,
+    opacity 90ms ease;
+}
+
+.board-drag-ghost.remote-drag-ghost.is-facedown {
+  border-color: #6e8f78;
+  background:
+    radial-gradient(circle at center, #2d4d3a 0 12px, transparent 13px),
+    linear-gradient(145deg, #8fc3a7 0%, #74ae91 45%, #659f83 100%);
+  color: transparent;
+}
+
+.board-drag-ghost.remote-drag-ghost.seat-ghost-1 {
+  box-shadow: 0 10px 18px rgba(190, 119, 94, 0.26);
+}
+
+.board-drag-ghost.remote-drag-ghost.seat-ghost-2 {
+  box-shadow: 0 10px 18px rgba(86, 126, 177, 0.26);
+}
+
+.board-drag-ghost.remote-drag-ghost.seat-ghost-3 {
+  box-shadow: 0 10px 18px rgba(173, 131, 53, 0.26);
+}
+
+.board-drag-ghost.remote-drag-ghost.seat-ghost-4 {
+  box-shadow: 0 10px 18px rgba(132, 102, 163, 0.26);
+}
+
 .board-drag-ghost.mobile-lifted {
   box-shadow:
     0 18px 34px rgba(0, 0, 0, 0.28),

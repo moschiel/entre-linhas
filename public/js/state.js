@@ -23,6 +23,7 @@
     pendingRemovalSeat: null,
     removedFromSession: false,
     removedMessage: "",
+    remoteDragBySeat: {},
     isHost() {
       return this.mySystemRole === "host";
     },
