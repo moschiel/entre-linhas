@@ -358,6 +358,9 @@
       }
 
       const isMe = seat === gameState.mySeatValue;
+      if (panel) {
+        panel.classList.toggle("my-seat-panel", isMe && isOccupied);
+      }
       if (editButton) {
         editButton.classList.toggle("hidden", !isMe || !isOccupied);
       }
