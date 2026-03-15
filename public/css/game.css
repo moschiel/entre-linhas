@@ -125,18 +125,41 @@
   pointer-events: none;
 }
 
-.deck-current-panel.my-seat-panel {
+.deck-current-panel.seat-panel-1 {
   background:
-    radial-gradient(circle at top right, rgba(122, 189, 154, 0.22), transparent 46%),
-    linear-gradient(180deg, #f8fdf9 0%, #e8f6ec 100%);
-  border-color: #7cb696;
+    linear-gradient(180deg, #fff4f1 0%, #fbe3dc 100%);
+  border-color: #d89d8d;
+  box-shadow: 0 8px 18px rgba(190, 119, 94, 0.12);
+}
+
+.deck-current-panel.seat-panel-2 {
+  background:
+    linear-gradient(180deg, #f3f8ff 0%, #ddebf9 100%);
+  border-color: #91b2d9;
+  box-shadow: 0 8px 18px rgba(86, 126, 177, 0.12);
+}
+
+.deck-current-panel.seat-panel-3 {
+  background:
+    linear-gradient(180deg, #fff8ec 0%, #f8e9c8 100%);
+  border-color: #d4b06f;
+  box-shadow: 0 8px 18px rgba(173, 131, 53, 0.12);
+}
+
+.deck-current-panel.seat-panel-4 {
+  background:
+    linear-gradient(180deg, #f8f3fb 0%, #eadcf4 100%);
+  border-color: #b49dca;
+  box-shadow: 0 8px 18px rgba(132, 102, 163, 0.12);
+}
+
+.deck-current-panel.my-seat-panel {
   box-shadow:
-    0 0 0 1px rgba(124, 182, 150, 0.18),
-    0 10px 22px rgba(81, 138, 106, 0.14);
+    0 0 0 2px rgba(255, 255, 255, 0.75),
+    0 0 0 4px rgba(61, 86, 74, 0.14);
 }
 
 .deck-current-panel.my-seat-panel .deck-visual-label {
-  color: #2f6a4f;
   font-weight: 700;
 }
 
@@ -145,8 +168,8 @@
   margin-left: auto;
   padding: 3px 7px;
   border-radius: 999px;
-  background: rgba(106, 170, 136, 0.18);
-  color: #2f6a4f;
+  background: rgba(61, 86, 74, 0.12);
+  color: #395348;
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -154,6 +177,26 @@
 
 .deck-current-panel.my-seat-panel .player-label-actions {
   margin-left: 6px;
+}
+
+.seat-text-1 {
+  color: #a95843;
+  font-weight: 700;
+}
+
+.seat-text-2 {
+  color: #456e9d;
+  font-weight: 700;
+}
+
+.seat-text-3 {
+  color: #9a7121;
+  font-weight: 700;
+}
+
+.seat-text-4 {
+  color: #7a579c;
+  font-weight: 700;
 }
 
 .table-current-stack {

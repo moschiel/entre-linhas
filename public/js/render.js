@@ -82,6 +82,44 @@
     };
   }
 
+  function clearSeatPanelTheme(element) {
+    if (!element) {
+      return;
+    }
+
+    PLAYER_SEAT_ORDER.forEach((seat) => {
+      element.classList.remove(`seat-panel-${seat}`);
+    });
+  }
+
+  function clearSeatTextTheme(element) {
+    if (!element) {
+      return;
+    }
+
+    PLAYER_SEAT_ORDER.forEach((seat) => {
+      element.classList.remove(`seat-text-${seat}`);
+    });
+  }
+
+  function applySeatPanelTheme(element, seat) {
+    clearSeatPanelTheme(element);
+    if (!element || !PLAYER_SEAT_ORDER.includes(seat)) {
+      return;
+    }
+
+    element.classList.add(`seat-panel-${seat}`);
+  }
+
+  function applySeatTextTheme(element, seat) {
+    clearSeatTextTheme(element);
+    if (!element || !PLAYER_SEAT_ORDER.includes(seat)) {
+      return;
+    }
+
+    element.classList.add(`seat-text-${seat}`);
+  }
+
   function setVisibility(element, visible) {
     element.classList.toggle("hidden", !visible);
   }
@@ -351,13 +389,20 @@
       if (panel) {
         panel.classList.remove("hidden");
         panel.classList.toggle("slot-gap", !isOccupied);
+        if (isOccupied) {
+          applySeatPanelTheme(panel, seat);
+        } else {
+          clearSeatPanelTheme(panel);
+        }
       }
       if (player && player.occupied) {
         label.textContent = player.online ? player.name : `${player.name} (offline)`;
         label.classList.toggle("player-offline", !player.online);
+        applySeatTextTheme(label, seat);
       } else {
         label.textContent = player ? player.defaultName : `Jogador ${seat}`;
         label.classList.remove("player-offline");
+        clearSeatTextTheme(label);
       }
 
       const isMe = seat === gameState.mySeatValue;
@@ -523,6 +568,7 @@
       const player = playerBySeat[seat];
       if (!player || !player.occupied) {
         target.textContent = "vazio";
+        clearSeatTextTheme(target);
         if (removeButton) {
           removeButton.classList.add("hidden");
           removeButton.disabled = false;
@@ -531,6 +577,7 @@
       }
 
       target.textContent = formatSlot(player);
+      applySeatTextTheme(target, seat);
       if (removeButton) {
         const canRemovePlayer = gamePhase === "lobby" && gameState && gameState.isHost() && seat !== 1;
         removeButton.classList.toggle("hidden", !canRemovePlayer);
