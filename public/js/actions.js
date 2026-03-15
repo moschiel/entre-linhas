@@ -229,8 +229,10 @@
       const targetRect = target.getBoundingClientRect();
       const ripple = document.createElement("span");
       ripple.className = `impact-ripple impact-ripple-fixed ${rippleClass}`;
-      ripple.style.left = `${targetRect.left + (targetRect.width / 2)}px`;
-      ripple.style.top = `${targetRect.top + (targetRect.height / 2)}px`;
+      ripple.style.left = `${targetRect.left}px`;
+      ripple.style.top = `${targetRect.top}px`;
+      ripple.style.width = `${targetRect.width}px`;
+      ripple.style.height = `${targetRect.height}px`;
       document.body.appendChild(ripple);
       ripple.addEventListener("animationend", () => {
         if (ripple.parentNode) {
